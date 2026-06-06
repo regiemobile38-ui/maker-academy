@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MAKER ACADEMY — Espace Formation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<style>
+:root {
+  --blue:#1E3A8A;--blue2:#2548B0;--blue-light:#EFF4FF;--blue-mid:#DBEAFE;
+  --orange:#F97316;--orange-light:rgba(249,115,22,0.1);--orange-border:rgba(249,115,22,0.25);
+  --white:#FFFFFF;--gray50:#F9FAFB;--gray100:#F3F4F6;--gray200:#E5E7EB;
+  --gray400:#9CA3AF;--gray600:#4B5563;--gray800:#1F2937;--gray900:#111827;
+  --green:#059669;--green-light:rgba(5,150,105,0.1);
+  --red:#DC2626;--red-light:rgba(220,38,38,0.08);
+  --font:'DM Sans',-apple-system,sans-serif;
+  --r:12px;--r2:16px;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 4px 16px rgba(0,0,0,0.06);
+  --shadow2:0 4px 24px rgba(30,58,138,0.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--font);background:var(--gray50);color:var(--gray900);min-height:100vh;}
+.view{display:none;min-height:100vh;}
+.view.active{display:block;}
+
+/* ─── LOGIN ─── */
+.login-page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#EFF4FF 0%,#DBEAFE 50%,#FFF7ED 100%);}
+.login-logo{text-align:center;margin-bottom:32px;}
+.login-logo-img{width:64px;height:64px;background:var(--blue);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:var(--shadow2);}
+.login-logo-img svg{width:36px;height:36px;fill:white;}
+.login-brand-name{font-size:22px;font-weight:700;color:var(--blue);letter-spacing:-0.02em;}
+.login-brand-name span{color:var(--orange);}
+.login-tagline{font-size:12px;color:var(--gray400);letter-spacing:0.08em;text-transform:uppercase;margin-top:4px;}
+.login-card{background:white;border-radius:var(--r2);padding:28px 24px;width:100%;max-width:360px;box-shadow:var(--shadow2);border:1px solid var(--gray200);}
+.login-card h2{font-size:18px;font-weight:700;color:var(--gray900);margin-bottom:4px;}
+.login-card p{font-size:13px;color:var(--gray400);margin-bottom:20px;}
+.role-tabs{display:flex;background:var(--gray100);border-radius:10px;padding:3px;margin-bottom:20px;gap:3px;}
+.role-tab{flex:1;padding:9px;text-align:center;font-size:13px;font-weight:600;color:var(--gray600);border-radius:8px;cursor:pointer;border:none;background:transparent;font-family:var(--font);transition:all .2s;-webkit-appearance:none;appearance:none;touch-action:manipulation;}
+.role-tab.on{background:white;color:var(--blue);box-shadow:0 1px 4px rgba(0,0,0,0.1);}
+.role-tab:not(.on):hover{background:rgba(255,255,255,0.5);color:var(--gray800);}
+.field{margin-bottom:14px;}
+.field label{font-size:11px;font-weight:600;color:var(--gray600);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.06em;}
+.field input{width:100%;padding:11px 13px;border:1.5px solid var(--gray200);border-radius:10px;font-size:14px;color:var(--gray900);background:white;outline:none;font-family:var(--font);transition:border-color .2s;}
+.field input:focus{border-color:var(--blue);}
+.btn-primary{width:100%;padding:13px;background:var(--blue);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);transition:background .2s;margin-top:4px;}
+.btn-primary:hover{background:var(--blue2);}
+.btn-primary:active{transform:scale(0.99);}
+.err-msg{font-size:12px;color:var(--red);margin-top:8px;display:none;}
+
+/* ─── HEADER ─── */
+.hdr{background:white;border-bottom:1px solid var(--gray200);padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.hdr-brand{display:flex;align-items:center;gap:10px;}
+.hdr-logo{width:32px;height:32px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.hdr-logo svg{width:18px;height:18px;fill:white;}
+.hdr-name{font-size:14px;font-weight:700;color:var(--blue);}
+.hdr-name span{color:var(--orange);}
+.hdr-right{display:flex;align-items:center;gap:8px;}
+.hdr-user{font-size:12px;color:var(--gray400);}
+.hdr-logout{font-size:12px;color:var(--gray400);background:none;border:none;cursor:pointer;padding:6px 10px;border-radius:8px;font-family:var(--font);}
+.hdr-logout:hover{background:var(--gray100);color:var(--gray800);}
+.blue-line{height:3px;background:linear-gradient(90deg,var(--blue),var(--orange));}
+
+/* ─── STAGIAIRE ─── */
+.stag-hero{background:linear-gradient(135deg,var(--blue) 0%,var(--blue2) 100%);padding:24px 16px;color:white;}
+.stag-welcome{font-size:13px;opacity:0.7;margin-bottom:4px;}
+.stag-name{font-size:20px;font-weight:700;margin-bottom:16px;}
+.progress-wrap{background:rgba(255,255,255,0.15);border-radius:100px;height:8px;margin-bottom:8px;}
+.progress-bar{height:8px;border-radius:100px;background:var(--orange);transition:width .5s ease;}
+.progress-info{display:flex;justify-content:space-between;font-size:11px;opacity:0.8;}
+
+.modules-list{padding:12px 14px;}
+.mod-card{background:white;border:1.5px solid var(--gray200);border-radius:var(--r2);margin-bottom:12px;overflow:hidden;transition:border-color .2s,box-shadow .2s;}
+.mod-card.unlocked{border-color:var(--gray200);}
+.mod-card.completed{border-color:var(--green);background:linear-gradient(135deg,white,#F0FDF4);}
+.mod-card.locked{opacity:0.55;}
+.mod-card.current{border-color:var(--blue);box-shadow:var(--shadow2);}
+.mod-header{padding:16px;display:flex;align-items:flex-start;gap:12px;cursor:pointer;}
+.mod-num{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
+.mod-num.st-locked{background:var(--gray100);color:var(--gray400);}
+.mod-num.st-unlocked{background:var(--blue-light);color:var(--blue);}
+.mod-num.st-completed{background:var(--green-light);color:var(--green);}
+.mod-num.st-current{background:var(--blue);color:white;}
+.mod-info{flex:1;}
+.mod-title{font-size:14px;font-weight:700;color:var(--gray900);margin-bottom:2px;}
+.mod-card.locked .mod-title{color:var(--gray400);}
+.mod-subtitle{font-size:11px;color:var(--gray400);}
+.mod-badge{font-size:10px;padding:3px 9px;border-radius:20px;font-weight:600;white-space:nowrap;}
+.b-locked{background:var(--gray100);color:var(--gray400);}
+.b-current{background:var(--blue-light);color:var(--blue);}
+.b-completed{background:var(--green-light);color:var(--green);}
+.b-submitted{background:var(--orange-light);color:var(--orange);}
+
+.mod-body{display:none;border-top:1px solid var(--gray100);padding:16px;}
+.mod-body.open{display:block;}
+
+.cours-block{background:var(--blue-light);border-left:3px solid var(--blue);border-radius:0 8px 8px 0;padding:12px 14px;margin-bottom:16px;}
+.cours-title{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;}
+.cours-item{font-size:13px;color:var(--gray800);margin-bottom:4px;padding-left:12px;position:relative;}
+.cours-item::before{content:'→';position:absolute;left:0;color:var(--blue);font-size:11px;}
+
+.exo-block{background:white;border:1.5px solid var(--orange-border);border-radius:var(--r);padding:14px;margin-bottom:14px;}
+.exo-label{font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;}
+.exo-question{font-size:13px;color:var(--gray800);margin-bottom:12px;line-height:1.5;}
+.exo-textarea{width:100%;padding:11px 13px;border:1.5px solid var(--gray200);border-radius:10px;font-size:13px;color:var(--gray900);font-family:var(--font);outline:none;resize:vertical;min-height:100px;transition:border-color .2s;}
+.exo-textarea:focus{border-color:var(--orange);}
+
+/* QCM */
+.qcm-options{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+.qcm-opt{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1.5px solid var(--gray200);border-radius:10px;cursor:pointer;transition:all .2s;}
+.qcm-opt:hover{border-color:var(--blue);background:var(--blue-light);}
+.qcm-opt.selected{border-color:var(--blue);background:var(--blue-light);}
+.qcm-opt.correct{border-color:var(--green);background:var(--green-light);}
+.qcm-opt.wrong{border-color:var(--red);background:var(--red-light);}
+.qcm-check{width:18px;height:18px;border-radius:50%;border:2px solid var(--gray200);flex-shrink:0;margin-top:1px;transition:all .2s;}
+.qcm-opt.selected .qcm-check,.qcm-opt.correct .qcm-check{border-color:var(--blue);background:var(--blue);}
+.qcm-opt.wrong .qcm-check{border-color:var(--red);background:var(--red);}
+.qcm-text{font-size:13px;color:var(--gray800);line-height:1.4;}
+
+.score-display{background:var(--green-light);border:1.5px solid var(--green);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--green);font-weight:600;margin-top:10px;display:none;}
+.score-display.fail{background:var(--red-light);border-color:var(--red);color:var(--red);}
+
+/* SIGNATURE */
+.sign-block{border:1.5px solid var(--blue-mid);border-radius:var(--r);padding:14px;background:var(--blue-light);margin-bottom:14px;}
+.sign-title{font-size:12px;font-weight:700;color:var(--blue);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.sign-name-input{width:100%;padding:10px 13px;border:1.5px solid var(--gray200);border-radius:10px;font-size:14px;color:var(--gray900);font-family:var(--font);outline:none;margin-bottom:10px;background:white;}
+.sign-name-input:focus{border-color:var(--blue);}
+.sign-check-row{display:flex;align-items:flex-start;gap:10px;}
+.sign-checkbox{width:18px;height:18px;border:2px solid var(--gray200);border-radius:4px;flex-shrink:0;cursor:pointer;appearance:none;-webkit-appearance:none;background:white;margin-top:1px;transition:all .2s;}
+.sign-checkbox:checked{background:var(--blue);border-color:var(--blue);}
+.sign-check-label{font-size:12px;color:var(--gray600);line-height:1.5;cursor:pointer;}
+
+.submitted-banner{background:var(--orange-light);border:1.5px solid var(--orange-border);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--orange);font-weight:600;}
+.validated-banner{background:var(--green-light);border:1.5px solid var(--green);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--green);font-weight:600;}
+
+.btn-submit{width:100%;padding:13px;background:var(--orange);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .2s;}
+.btn-submit:hover{background:#EA6B10;}
+.btn-submit:disabled{background:var(--gray200);color:var(--gray400);cursor:not-allowed;}
+
+/* ─── ADMIN ─── */
+.admin-tabs{display:flex;background:white;border-bottom:1px solid var(--gray200);overflow-x:auto;}
+.admin-tab{padding:12px 16px;font-size:13px;font-weight:600;color:var(--gray400);border-bottom:2.5px solid transparent;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.admin-tab.on{color:var(--blue);border-bottom-color:var(--blue);}
+
+.admin-page{display:none;padding:0 0 80px;}
+.admin-page.on{display:block;}
+
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px;}
+.stat-box{background:white;border:1px solid var(--gray200);border-radius:var(--r);padding:12px;}
+.stat-num{font-size:22px;font-weight:700;color:var(--blue);}
+.stat-lbl{font-size:10px;color:var(--gray400);margin-top:2px;}
+
+.stag-row{background:white;border:1px solid var(--gray200);border-radius:var(--r2);margin:0 14px 10px;overflow:hidden;}
+.stag-row-hdr{padding:14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.stag-row-name{font-size:14px;font-weight:700;color:var(--gray900);}
+.stag-row-meta{font-size:11px;color:var(--gray400);margin-top:2px;}
+.stag-prog-mini{display:flex;align-items:center;gap:8px;}
+.prog-mini-bar{width:60px;height:6px;background:var(--gray100);border-radius:100px;}
+.prog-mini-fill{height:6px;background:var(--orange);border-radius:100px;}
+.prog-mini-pct{font-size:11px;font-weight:700;color:var(--orange);}
+
+.stag-detail{display:none;border-top:1px solid var(--gray100);}
+.stag-detail.open{display:block;}
+.mod-status-row{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--gray100);}
+.mod-status-row:last-child{border-bottom:none;}
+.mod-status-info{display:flex;align-items:center;gap:10px;}
+.mod-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.mod-dot.locked{background:var(--gray200);}
+.mod-dot.unlocked{background:var(--orange);}
+.mod-dot.submitted{background:var(--blue);}
+.mod-dot.validated{background:var(--green);}
+.mod-status-name{font-size:13px;color:var(--gray800);}
+.mod-status-time{font-size:10px;color:var(--gray400);margin-top:1px;}
+
+.btn-validate{padding:6px 14px;background:var(--blue);color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);}
+.btn-validate:hover{background:var(--blue2);}
+.btn-unlock{padding:6px 14px;background:white;color:var(--orange);border:1.5px solid var(--orange-border);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);}
+
+.reponse-block{background:var(--gray50);border-radius:8px;padding:10px 12px;margin:8px 14px;font-size:12px;color:var(--gray600);line-height:1.5;}
+.reponse-label{font-size:10px;font-weight:700;color:var(--gray400);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
+
+.export-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:calc(100% - 28px);margin:14px;padding:13px;background:white;border:1.5px solid var(--blue);border-radius:10px;color:var(--blue);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);}
+.export-btn:hover{background:var(--blue-light);}
+
+/* ADMIN - Créer stagiaire */
+.create-form{background:white;border:1px solid var(--gray200);border-radius:var(--r2);margin:14px;padding:16px;}
+.create-form h3{font-size:15px;font-weight:700;color:var(--gray900);margin-bottom:14px;}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--gray900);border-radius:12px;padding:12px 20px;font-size:13px;color:white;z-index:999;display:none;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,0.3);}
+
+.empty{text-align:center;padding:40px 20px;color:var(--gray400);font-size:14px;}
+.sec-label{font-size:10px;font-weight:700;color:var(--gray400);text-transform:uppercase;letter-spacing:0.08em;padding:16px 14px 6px;}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="v-login" class="view active">
+  <div class="login-page">
+    <div class="login-logo">
+      <div class="login-logo-img">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <div class="login-brand-name">MAKER <span>ACADEMY</span></div>
+      <div class="login-tagline">Sourcing · Design · Lancement</div>
+    </div>
+    <div class="login-card">
+      <h2>Connexion</h2>
+      <p>Choisissez votre espace</p>
+      <div class="role-tabs">
+        <button class="role-tab on" id="rb-stag" onclick="setRole('stagiaire')" type="button">Stagiaire</button>
+        <button class="role-tab" id="rb-admin" onclick="setRole('admin')" type="button">Admin</button>
+      </div>
+      <div class="field"><label>Identifiant</label><input type="text" id="l-id" placeholder="Votre identifiant" autocomplete="off"/></div>
+      <div class="field"><label>Mot de passe</label><input type="password" id="l-pwd" placeholder="••••••"/></div>
+      <div class="err-msg" id="l-err">Identifiant ou mot de passe incorrect</div>
+      <button class="btn-primary" onclick="doLogin()" type="button">Se connecter</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ STAGIAIRE ═══ -->
+<div id="v-stag" class="view">
+  <div class="hdr">
+    <div class="hdr-brand">
+      <div class="hdr-logo"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+      <div class="hdr-name">MAKER <span>ACADEMY</span></div>
+    </div>
+    <div class="hdr-right">
+      <span class="hdr-user" id="s-username"></span>
+      <button class="hdr-logout" onclick="doLogout()">Déco</button>
+    </div>
+  </div>
+  <div class="blue-line"></div>
+
+  <div class="stag-hero">
+    <div class="stag-welcome">Bonjour,</div>
+    <div class="stag-name" id="s-nom">Stagiaire</div>
+    <div class="progress-wrap"><div class="progress-bar" id="s-prog-bar" style="width:0%"></div></div>
+    <div class="progress-info">
+      <span id="s-prog-txt">0 module complété</span>
+      <span id="s-prog-pct">0%</span>
+    </div>
+  </div>
+
+  <div class="modules-list" id="s-modules"></div>
+</div>
+
+<!-- ═══ ADMIN ═══ -->
+<div id="v-admin" class="view">
+  <div class="hdr">
+    <div class="hdr-brand">
+      <div class="hdr-logo"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+      <div class="hdr-name">MAKER <span>ACADEMY</span></div>
+    </div>
+    <div class="hdr-right">
+      <span class="hdr-user">Admin</span>
+      <button class="hdr-logout" onclick="doLogout()">Déco</button>
+    </div>
+  </div>
+  <div class="blue-line"></div>
+
+  <div class="admin-tabs">
+    <div class="admin-tab on" onclick="switchAdmin('dashboard')" id="at-dashboard">Tableau de bord</div>
+    <div class="admin-tab" onclick="switchAdmin('stagiaires')" id="at-stagiaires">Stagiaires</div>
+    <div class="admin-tab" onclick="switchAdmin('creer')" id="at-creer">+ Nouveau</div>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="admin-page on" id="ap-dashboard">
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-num" id="a-nb-stag">0</div><div class="stat-lbl">Stagiaires</div></div>
+      <div class="stat-box"><div class="stat-num" id="a-nb-valid">0</div><div class="stat-lbl">Modules validés</div></div>
+      <div class="stat-box"><div class="stat-num" id="a-nb-submit">0</div><div class="stat-lbl">En attente</div></div>
+    </div>
+    <div class="sec-label">Activité récente</div>
+    <div id="a-activite"><div class="empty">Aucune activité</div></div>
+  </div>
+
+  <!-- Stagiaires -->
+  <div class="admin-page" id="ap-stagiaires">
+    <div class="sec-label">Tous les stagiaires</div>
+    <div id="a-stag-list"><div class="empty">Aucun stagiaire</div></div>
+    <button class="export-btn" onclick="exportCSV()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Exporter suivi Qualiopi (CSV)
+    </button>
+  </div>
+
+  <!-- Créer stagiaire -->
+  <div class="admin-page" id="ap-creer">
+    <div class="create-form">
+      <h3>Créer un stagiaire</h3>
+      <div class="field"><label>Nom complet</label><input type="text" id="nc-nom" placeholder="Jean Dupont"/></div>
+      <div class="field"><label>Identifiant</label><input type="text" id="nc-id" placeholder="jean.dupont"/></div>
+      <div class="field"><label>Mot de passe</label><input type="password" id="nc-pwd" placeholder="••••••"/></div>
+      <button class="btn-primary" onclick="createStagiaire()" type="button">Créer le compte</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ FIREBASE ═══
+const firebaseConfig = {
+  apiKey: "AIzaSyBZy_xySurug2-WxD1j1h-9_ziCP7R7soQ",
+  authDomain: "maker-academy-18285.firebaseapp.com",
+  databaseURL: "https://maker-academy-18285-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "maker-academy-18285",
+  storageBucket: "maker-academy-18285.firebasestorage.app",
+  messagingSenderId: "144885322657",
+  appId: "1:144885322657:web:58d0d9bf8c735db0eef1e0"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ═══ DONNÉES MODULES ═══
+const MODULES = [
+  {
+    id: 1,
+    titre: "Identifier une vraie opportunité produit",
+    duree: "2h — 2 sessions",
+    cours: [
+      "Pourquoi copier les tendances Amazon = guerre des prix garantie",
+      "Les avis négatifs comme mine d'or d'opportunités",
+      "Le carnet de frustrations : noter tout ce qui énerve au quotidien",
+      "Produit évident vs produit éducateur (ex : INSO°, Apple Watch)",
+      "Valider sans dépenser : post réseaux, sondage entourage, précommande"
+    ],
+    typeEval: "texte",
+    evalLabel: "Exercice — Carnet de frustrations",
+    evalQuestion: "Identifie 3 opportunités produit réelles à partir de tes observations du quotidien. Pour chacune : décris le problème observé, pourquoi les solutions existantes échouent, et pourquoi tu penses que c'est une vraie opportunité.",
+    evalPlaceholder: "Opportunité 1 :\nProblème observé : ...\nPourquoi les solutions actuelles échouent : ...\nPourquoi c'est une vraie opportunité : ...\n\nOpportunité 2 :\n...\n\nOpportunité 3 :\n..."
+  },
+  {
+    id: 2,
+    titre: "Trouver et approcher le bon fournisseur",
+    duree: "2h — 2 sessions",
+    cours: [
+      "Alibaba = épicerie fine (marge x3). 1688 = directement à la ferme",
+      "Le Guanxi : construire la relation avant de parler prix",
+      "Utiliser l'IA pour rédiger en chinois professionnel",
+      "Lire une fiche fournisseur 1688 : notes, transactions, ancienneté",
+      "Red flags : Western Union, PayPal friends & family, Wise direct, WeChat non vérifié"
+    ],
+    typeEval: "qcm",
+    evalLabel: "QCM — Pièges fournisseurs (score minimum 4/5)",
+    evalQuestion: "Pour chaque scénario, identifie s'il s'agit d'un fournisseur fiable ou d'un piège.",
+    qcm: [
+      {
+        q: "Un fournisseur vous demande de payer via Western Union pour bénéficier d'un prix spécial.",
+        options: ["C'est une pratique normale en Chine", "C'est un red flag — ne jamais payer via Western Union", "C'est acceptable pour les petites commandes", "C'est normal si le fournisseur est bien noté"],
+        correct: 1
+      },
+      {
+        q: "Un compte fournisseur 1688 est créé il y a 2 semaines avec 0 transaction et propose des prix très bas.",
+        options: ["Excellente opportunité — prix bas = bonne affaire", "Peu importe l'ancienneté si les photos sont belles", "Red flag — compte trop récent, aucune preuve de fiabilité", "Normal pour les nouveaux fournisseurs"],
+        correct: 2
+      },
+      {
+        q: "Vous voulez commencer une relation avec une usine. Quelle est la meilleure première approche ?",
+        options: ["Demander immédiatement le prix le plus bas possible", "Présenter votre projet et montrer un intérêt sincère avant de parler prix", "Menacer d'aller chez un concurrent si les prix ne baissent pas", "Ne jamais mentionner que vous êtes français"],
+        correct: 1
+      },
+      {
+        q: "Un fournisseur vous propose de payer via PayPal 'friends & family' pour éviter les frais.",
+        options: ["Bonne idée pour économiser sur les frais de transaction", "Red flag — aucune protection acheteur en cas de problème", "C'est la méthode recommandée pour les petites commandes", "Acceptable si vous connaissez bien le fournisseur"],
+        correct: 1
+      },
+      {
+        q: "Alipay conserve votre paiement jusqu'à ce que vous confirmiez la réception conforme. C'est quoi ce mécanisme ?",
+        options: ["Une arnaque pour retarder le remboursement", "L'entiercement — votre protection principale contre les arnaques", "Une taxe supplémentaire imposée par Alibaba", "Un bug courant sur la plateforme"],
+        correct: 1
+      }
+    ]
+  },
+  {
+    id: 3,
+    titre: "Passer sa première commande",
+    duree: "2h — 2 sessions",
+    cours: [
+      "L'échantillon : non négociable avant toute commande en volume",
+      "Checklist échantillon : matériaux, finitions, fonctionnalité, packaging",
+      "Piège classique : premier échantillon parfait, série dégradée",
+      "DDP (Delivered Duty Paid) : le fournisseur gère tout jusqu'à ta porte",
+      "Calcul prix de revient : produit + packaging + fret DDP + marge"
+    ],
+    typeEval: "texte",
+    evalLabel: "Exercice — Négociation + Prix de revient",
+    evalQuestion: "1. Rédigez un message de négociation professionnel à envoyer à une usine pour une commande de 200 unités d'un produit de votre choix.\n\n2. Calculez le prix de revient complet pour ce produit en imaginant : prix usine 3€, packaging 0,50€, fret DDP 1€. Quelle marge appliquez-vous et pourquoi ?",
+    evalPlaceholder: "1. Message de négociation :\n\nBonjour, ...\n\n2. Calcul prix de revient :\n- Prix usine : 3€\n- Packaging : 0,50€\n- Fret DDP : 1€\n- Total revient : ...\n- Prix de vente : ...\n- Marge : ...\n- Justification : ..."
+  },
+  {
+    id: 4,
+    titre: "Créer son produit physique de A à Z",
+    duree: "2h — 2 sessions",
+    cours: [
+      "L'itération par le bon sens : pivot LCD → e-ink (exemple INSO°)",
+      "Question clé : l'utilisateur maintiendra-t-il ce produit dans sa routine ?",
+      "Design avec l'IA : français → ChatGPT prompt → Gemini visuel → usine",
+      "Sourcer le packaging : usine boîte + usine impression séparées",
+      "Rédiger le cahier des charges (brief) usine en anglais/chinois avec l'IA"
+    ],
+    typeEval: "texte",
+    evalLabel: "Exercice — Brief usine",
+    evalQuestion: "Rédigez un brief usine complet pour un produit physique de votre choix. Il doit contenir : nom du produit, matériaux souhaités, dimensions approximatives, couleurs, spécifications techniques, type de packaging, quantité souhaitée, et une description du visuel voulu pour le packaging.",
+    evalPlaceholder: "BRIEF USINE — [NOM DU PRODUIT]\n\nMatériaux : ...\nDimensions : ...\nCouleurs : ...\nSpécifications techniques : ...\nPackaging : ...\nQuantité : ...\nVisuel packaging : ..."
+  },
+  {
+    id: 5,
+    titre: "Lancer et vendre — jusqu'à la première vente",
+    duree: "2h — 2 sessions",
+    cours: [
+      "Signaux positifs : demandes de prix, feedbacks spontanés, précommandes",
+      "Identifier son canal naturel : TikTok, LinkedIn, bouche à oreille",
+      "Structure TikTok/Reels : 0–3s accroche, 3–8s problème, 8–15s solution, 15–30s CTA",
+      "Preuve terrain : ventes organiques zéro budget pub",
+      "Engagement MAKER ACADEMY : accompagnement jusqu'à la première vente"
+    ],
+    typeEval: "texte",
+    evalLabel: "Exercice — Script première vidéo produit",
+    evalQuestion: "Rédigez le script complet de votre première vidéo produit (format TikTok/Reels, 30 secondes max) pour le produit que vous avez choisi pendant la formation. Respectez la structure : accroche (0–3s), problème (3–8s), solution (8–15s), appel à l'action (15–30s).",
+    evalPlaceholder: "SCRIPT VIDÉO — [NOM DU PRODUIT]\n\n0–3s (ACCROCHE) : ...\n\n3–8s (PROBLÈME) : ...\n\n8–15s (SOLUTION) : ...\n\n15–30s (APPEL À L'ACTION) : ..."
+  }
+];
+
+// ═══ STATE ═══
+let currentUser = null;
+let currentRole = 'stagiaire';
+let stagData = {};
+let allStagiaires = {};
+let qcmAnswers = {};
+
+// ═══ LOGIN ═══
+function setRole(r) {
+  currentRole = r;
+  document.getElementById('rb-stag').classList.toggle('on', r==='stagiaire');
+  document.getElementById('rb-admin').classList.toggle('on', r==='admin');
+}
+
+async function doLogin() {
+  const id = document.getElementById('l-id').value.trim();
+  const pwd = document.getElementById('l-pwd').value;
+  const errEl = document.getElementById('l-err');
+  errEl.style.display = 'none';
+
+  if (!id || !pwd) { errEl.style.display='block'; errEl.textContent='Remplissez tous les champs'; return; }
+
+  if (currentRole === 'admin') {
+    const snap = await db.ref('admin').get();
+    const admin = snap.val() || {};
+    if (admin.id === id && admin.password === pwd) {
+      currentUser = { id, role: 'admin', nom: 'Formateur' };
+      sessionStorage.setItem('ma_user', JSON.stringify(currentUser));
+      loadAdmin();
+      show('v-admin');
+    } else {
+      errEl.style.display = 'block';
+    }
+  } else {
+    const snap = await db.ref('stagiaires/' + id).get();
+    if (!snap.exists()) { errEl.style.display='block'; return; }
+    const s = snap.val();
+    if (s.password !== pwd) { errEl.style.display='block'; return; }
+    currentUser = { id, role: 'stagiaire', nom: s.nom };
+    sessionStorage.setItem('ma_user', JSON.stringify(currentUser));
+    stagData = s;
+    loadStagiaire();
+    show('v-stag');
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('ma_user');
+  currentUser = null;
+  show('v-login');
+}
+
+// ═══ ESPACE STAGIAIRE ═══
+function loadStagiaire() {
+  document.getElementById('s-nom').textContent = stagData.nom || 'Stagiaire';
+  document.getElementById('s-username').textContent = currentUser.id;
+
+  db.ref('stagiaires/' + currentUser.id).on('value', snap => {
+    stagData = snap.val() || {};
+    renderModules();
+    updateProgress();
+  });
+}
+
+function updateProgress() {
+  const mods = stagData.modules || {};
+  const validated = Object.values(mods).filter(m => m.statut === 'valide').length;
+  const pct = Math.round((validated / 5) * 100);
+  document.getElementById('s-prog-bar').style.width = pct + '%';
+  document.getElementById('s-prog-pct').textContent = pct + '%';
+  document.getElementById('s-prog-txt').textContent = validated + ' module' + (validated>1?'s':'') + ' complété' + (validated>1?'s':'');
+}
+
+function renderModules() {
+  const mods = stagData.modules || {};
+  let html = '';
+  MODULES.forEach((mod, idx) => {
+    const modData = mods['m' + mod.id] || {};
+    const statut = modData.statut || (idx === 0 ? 'debloque' : 'locked');
+
+    let badgeClass = 'b-locked', badgeText = '🔒 Verrouillé';
+    let numClass = 'st-locked', cardClass = 'locked';
+
+    if (statut === 'valide') { badgeClass='b-completed'; badgeText='✓ Validé'; numClass='st-completed'; cardClass='completed'; }
+    else if (statut === 'soumis') { badgeClass='b-submitted'; badgeText='⏳ En attente'; numClass='st-unlocked'; cardClass='unlocked'; }
+    else if (statut === 'debloque') { badgeClass='b-current'; badgeText='En cours'; numClass='st-current'; cardClass='current'; }
+
+    const isOpen = statut !== 'locked';
+
+    html += `<div class="mod-card ${cardClass}" id="mc-${mod.id}">
+      <div class="mod-header" onclick="${isOpen ? `toggleMod(${mod.id})` : ''}">
+        <div class="mod-num ${numClass}">${statut==='valide'?'✓':mod.id}</div>
+        <div class="mod-info">
+          <div class="mod-title">Module ${mod.id} — ${mod.titre}</div>
+          <div class="mod-subtitle">${mod.duree}</div>
+        </div>
+        <span class="mod-badge ${badgeClass}">${badgeText}</span>
+      </div>
+      <div class="mod-body" id="mb-${mod.id}">
+        ${isOpen ? renderModBody(mod, modData) : ''}
+      </div>
+    </div>`;
+  });
+  document.getElementById('s-modules').innerHTML = html;
+}
+
+function renderModBody(mod, modData) {
+  const statut = modData.statut || 'debloque';
+  let html = '';
+
+  // Cours
+  html += `<div class="cours-block"><div class="cours-title">📚 Ce que tu vas apprendre</div>`;
+  mod.cours.forEach(c => { html += `<div class="cours-item">${c}</div>`; });
+  html += `</div>`;
+
+  // Bannière statut
+  if (statut === 'soumis') {
+    html += `<div class="submitted-banner">⏳ Exercice soumis — En attente de validation par le formateur</div>`;
+  }
+  if (statut === 'valide') {
+    html += `<div class="validated-banner">✅ Module validé — Félicitations !</div>`;
+    if (modData.signature) {
+      html += `<div class="reponse-block"><div class="reponse-label">Signature enregistrée le ${formatDate(modData.signedAt)}</div>${modData.signature}</div>`;
+    }
+    return html;
+  }
+
+  // Exercice
+  html += `<div class="exo-block"><div class="exo-label">✏️ ${mod.evalLabel}</div>`;
+
+  if (mod.typeEval === 'qcm') {
+    html += `<div class="exo-question">${mod.evalQuestion}</div>`;
+    mod.qcm.forEach((q, qi) => {
+      html += `<div style="margin-bottom:14px;"><div style="font-size:13px;font-weight:600;color:var(--gray800);margin-bottom:8px;">${qi+1}. ${q.q}</div><div class="qcm-options">`;
+      q.options.forEach((opt, oi) => {
+        html += `<div class="qcm-opt" id="qopt-${mod.id}-${qi}-${oi}" onclick="selectQCM(${mod.id},${qi},${oi},${q.correct})">
+          <div class="qcm-check"></div>
+          <div class="qcm-text">${opt}</div>
+        </div>`;
+      });
+      html += `</div></div>`;
+    });
+    html += `<div class="score-display" id="score-${mod.id}"></div>`;
+  } else {
+    const existing = modData.reponse || '';
+    html += `<div class="exo-question">${mod.evalQuestion}</div>`;
+    html += `<textarea class="exo-textarea" id="rep-${mod.id}" placeholder="${mod.evalPlaceholder}" ${statut==='soumis'?'readonly':''}>${existing}</textarea>`;
+  }
+  html += `</div>`;
+
+  // Signature
+  if (statut !== 'soumis') {
+    html += `<div class="sign-block">
+      <div class="sign-title">✍️ Signature électronique de présence</div>
+      <input type="text" class="sign-name-input" id="sign-name-${mod.id}" placeholder="Votre nom complet"/>
+      <div class="sign-check-row">
+        <input type="checkbox" class="sign-checkbox" id="sign-check-${mod.id}"/>
+        <label class="sign-check-label" for="sign-check-${mod.id}">
+          Je certifie avoir suivi le Module ${mod.id} dans son intégralité et avoir réalisé l'exercice de manière autonome.
+        </label>
+      </div>
+    </div>`;
+    html += `<button class="btn-submit" onclick="submitModule(${mod.id})" id="btn-sub-${mod.id}">Soumettre l'exercice</button>`;
+  }
+
+  return html;
+}
+
+function toggleMod(id) {
+  const body = document.getElementById('mb-' + id);
+  body.classList.toggle('open');
+}
+
+let qcmScores = {};
+function selectQCM(modId, qi, oi, correct) {
+  if (!qcmAnswers[modId]) qcmAnswers[modId] = {};
+  // Désélectionner les autres options de cette question
+  const mod = MODULES[modId - 1];
+  mod.qcm[qi].options.forEach((_, i) => {
+    const el = document.getElementById(`qopt-${modId}-${qi}-${i}`);
+    if (el) el.classList.remove('selected', 'correct', 'wrong');
+  });
+  const selected = document.getElementById(`qopt-${modId}-${qi}-${oi}`);
+  if (selected) {
+    selected.classList.add(oi === correct ? 'correct' : 'wrong');
+    if (oi === correct) selected.classList.add('correct');
+    else selected.classList.add('wrong');
+  }
+  qcmAnswers[modId][qi] = { answer: oi, correct: oi === correct };
+
+  // Calculer score si toutes les questions répondues
+  const mod2 = MODULES[modId - 1];
+  if (Object.keys(qcmAnswers[modId]).length === mod2.qcm.length) {
+    const score = Object.values(qcmAnswers[modId]).filter(a => a.correct).length;
+    const scoreEl = document.getElementById('score-' + modId);
+    if (scoreEl) {
+      scoreEl.style.display = 'block';
+      scoreEl.textContent = `Score : ${score}/${mod2.qcm.length} — ${score >= 4 ? '✅ Validé' : '❌ Score insuffisant (minimum 4/5)'}`;
+      scoreEl.className = 'score-display' + (score < 4 ? ' fail' : '');
+    }
+    qcmScores[modId] = score;
+  }
+}
+
+async function submitModule(modId) {
+  const mod = MODULES[modId - 1];
+  const signName = document.getElementById('sign-name-' + modId)?.value.trim();
+  const signCheck = document.getElementById('sign-check-' + modId)?.checked;
+
+  if (!signName) { toast('Entrez votre nom pour signer'); return; }
+  if (!signCheck) { toast('Cochez la case de certification'); return; }
+
+  let reponse = '';
+  if (mod.typeEval === 'qcm') {
+    if (Object.keys(qcmAnswers[modId] || {}).length < mod.qcm.length) {
+      toast('Répondez à toutes les questions'); return;
+    }
+    const score = qcmScores[modId] || 0;
+    reponse = `QCM — Score : ${score}/5`;
+    if (score < 4) { toast('Score insuffisant (minimum 4/5). Réessayez.'); return; }
+  } else {
+    reponse = document.getElementById('rep-' + modId)?.value.trim();
+    if (!reponse || reponse.length < 50) { toast('Réponse trop courte — développez davantage'); return; }
+  }
+
+  const now = Date.now();
+  await db.ref(`stagiaires/${currentUser.id}/modules/m${modId}`).update({
+    statut: 'soumis',
+    reponse,
+    signature: signName,
+    signedAt: now,
+    submittedAt: now
+  });
+
+  // Log activité admin
+  await db.ref('activite').push({
+    type: 'soumission',
+    stagiaireId: currentUser.id,
+    stagiaireNom: stagData.nom,
+    moduleId: modId,
+    moduleTitre: mod.titre,
+    timestamp: now
+  });
+
+  toast('Module ' + modId + ' soumis — En attente de validation');
+}
+
+// ═══ ADMIN ═══
+function loadAdmin() {
+  db.ref('stagiaires').on('value', snap => {
+    allStagiaires = snap.val() || {};
+    renderAdminStats();
+    renderAdminStagiaires();
+  });
+  db.ref('activite').limitToLast(20).on('value', snap => {
+    renderActivite(snap.val() || {});
+  });
+}
+
+function renderAdminStats() {
+  const list = Object.values(allStagiaires);
+  document.getElementById('a-nb-stag').textContent = list.length;
+  let validated = 0, pending = 0;
+  list.forEach(s => {
+    const mods = s.modules || {};
+    Object.values(mods).forEach(m => {
+      if (m.statut === 'valide') validated++;
+      if (m.statut === 'soumis') pending++;
+    });
+  });
+  document.getElementById('a-nb-valid').textContent = validated;
+  document.getElementById('a-nb-submit').textContent = pending;
+}
+
+function renderAdminStagiaires() {
+  const list = Object.entries(allStagiaires);
+  if (!list.length) {
+    document.getElementById('a-stag-list').innerHTML = '<div class="empty">Aucun stagiaire créé</div>';
+    return;
+  }
+  document.getElementById('a-stag-list').innerHTML = list.map(([id, s]) => {
+    const mods = s.modules || {};
+    const validated = Object.values(mods).filter(m => m.statut === 'valide').length;
+    const pct = Math.round((validated / 5) * 100);
+    return `<div class="stag-row">
+      <div class="stag-row-hdr" onclick="toggleStagDetail('${id}')">
+        <div>
+          <div class="stag-row-name">${s.nom}</div>
+          <div class="stag-row-meta">${id} · ${validated}/5 modules validés</div>
+        </div>
+        <div class="stag-prog-mini">
+          <div class="prog-mini-bar"><div class="prog-mini-fill" style="width:${pct}%"></div></div>
+          <div class="prog-mini-pct">${pct}%</div>
+        </div>
+      </div>
+      <div class="stag-detail" id="sd-${id}">
+        ${renderStagModules(id, s)}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderStagModules(stagId, s) {
+  const mods = s.modules || {};
+  let html = '';
+  MODULES.forEach((mod, idx) => {
+    const modData = mods['m' + mod.id] || {};
+    const statut = modData.statut || (idx === 0 ? 'debloque' : 'locked');
+    let dotClass = 'locked', statusText = 'Verrouillé', timeText = '';
+    let actionBtn = '';
+
+    if (statut === 'valide') { dotClass='validated'; statusText='Validé'; timeText=formatDate(modData.validatedAt); }
+    else if (statut === 'soumis') {
+      dotClass='submitted'; statusText='Soumis — En attente';
+      timeText=formatDate(modData.submittedAt);
+      actionBtn = `<button class="btn-validate" onclick="validateModule('${stagId}',${mod.id})" type="button">Valider</button>`;
+    }
+    else if (statut === 'debloque') { dotClass='unlocked'; statusText='En cours'; }
+    else { actionBtn = `<button class="btn-unlock" onclick="unlockModule('${stagId}',${mod.id})" type="button">Débloquer</button>`; }
+
+    html += `<div class="mod-status-row">
+      <div class="mod-status-info">
+        <div class="mod-dot ${dotClass}"></div>
+        <div>
+          <div class="mod-status-name">M${mod.id} — ${mod.titre.substring(0,30)}...</div>
+          <div class="mod-status-time">${statusText}${timeText?' · '+timeText:''}</div>
+        </div>
+      </div>
+      ${actionBtn}
+    </div>`;
+
+    // Afficher la réponse si soumis
+    if (statut === 'soumis' && modData.reponse) {
+      html += `<div class="reponse-block">
+        <div class="reponse-label">Réponse soumise · Signé par : ${modData.signature || '—'}</div>
+        ${modData.reponse.substring(0,200)}${modData.reponse.length>200?'...':''}
+      </div>`;
+    }
+  });
+  return html;
+}
+
+window.toggleStagDetail = function(id) {
+  const el = document.getElementById('sd-' + id);
+  el.classList.toggle('open');
+};
+
+window.validateModule = async function(stagId, modId) {
+  const now = Date.now();
+  const nextModId = modId + 1;
+
+  // Valider le module
+  await db.ref(`stagiaires/${stagId}/modules/m${modId}`).update({ statut: 'valide', validatedAt: now });
+
+  // Débloquer le module suivant
+  if (nextModId <= 5) {
+    const nextSnap = await db.ref(`stagiaires/${stagId}/modules/m${nextModId}`).get();
+    if (!nextSnap.exists() || nextSnap.val().statut === 'locked') {
+      await db.ref(`stagiaires/${stagId}/modules/m${nextModId}`).update({ statut: 'debloque', unlockedAt: now });
+    }
+  }
+
+  // Log activité
+  await db.ref('activite').push({
+    type: 'validation',
+    stagiaireId: stagId,
+    moduleId: modId,
+    timestamp: now
+  });
+
+  toast(`Module ${modId} validé — Module ${nextModId} débloqué`);
+};
+
+window.unlockModule = async function(stagId, modId) {
+  await db.ref(`stagiaires/${stagId}/modules/m${modId}`).update({ statut: 'debloque', unlockedAt: Date.now() });
+  toast('Module ' + modId + ' débloqué');
+};
+
+window.createStagiaire = async function() {
+  const nom = document.getElementById('nc-nom').value.trim();
+  const id = document.getElementById('nc-id').value.trim().toLowerCase();
+  const pwd = document.getElementById('nc-pwd').value;
+  if (!nom || !id || !pwd) { toast('Remplissez tous les champs'); return; }
+
+  const snap = await db.ref('stagiaires/' + id).get();
+  if (snap.exists()) { toast('Identifiant déjà utilisé'); return; }
+
+  await db.ref('stagiaires/' + id).set({
+    nom, password: pwd, createdAt: Date.now(),
+    modules: { m1: { statut: 'debloque', unlockedAt: Date.now() } }
+  });
+
+  ['nc-nom','nc-id','nc-pwd'].forEach(i => document.getElementById(i).value = '');
+  toast('Stagiaire ' + nom + ' créé');
+  switchAdmin('stagiaires');
+};
+
+function renderActivite(data) {
+  const list = Object.entries(data).sort((a,b) => b[1].timestamp - a[1].timestamp).slice(0,10);
+  if (!list.length) { document.getElementById('a-activite').innerHTML = '<div class="empty">Aucune activité récente</div>'; return; }
+
+  document.getElementById('a-activite').innerHTML = list.map(([k,v]) => {
+    const icon = v.type === 'validation' ? '✅' : '📝';
+    const text = v.type === 'validation'
+      ? `Module ${v.moduleId} validé pour ${v.stagiaireId}`
+      : `Module ${v.moduleId} soumis par ${v.stagiaireNom || v.stagiaireId}`;
+    return `<div style="background:white;border:1px solid var(--gray200);border-radius:10px;padding:12px 14px;margin:0 14px 8px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:18px;">${icon}</span>
+      <div>
+        <div style="font-size:13px;color:var(--gray800);font-weight:500;">${text}</div>
+        <div style="font-size:11px;color:var(--gray400);margin-top:2px;">${formatDate(v.timestamp)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function switchAdmin(tab) {
+  ['dashboard','stagiaires','creer'].forEach(t => {
+    document.getElementById('at-'+t).classList.toggle('on', t===tab);
+    document.getElementById('ap-'+t).classList.toggle('on', t===tab);
+  });
+}
+
+// ═══ EXPORT CSV QUALIOPI ═══
+window.exportCSV = function() {
+  let csv = 'Stagiaire;Identifiant;Module;Statut;Date soumission;Date validation;Signature\n';
+  Object.entries(allStagiaires).forEach(([id, s]) => {
+    const mods = s.modules || {};
+    MODULES.forEach(mod => {
+      const m = mods['m' + mod.id] || {};
+      csv += `${s.nom};${id};M${mod.id} - ${mod.titre};${m.statut||'non débuté'};${m.submittedAt?formatDate(m.submittedAt):''};${m.validatedAt?formatDate(m.validatedAt):''};${m.signature||''}\n`;
+    });
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'suivi_qualiopi_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  toast('Export CSV téléchargé');
+};
+
+// ═══ HELPERS ═══
+function show(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function formatDate(ts) {
+  if (!ts) return '';
+  return new Date(ts).toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2800);
+}
+
+// ═══ INIT ADMIN PAR DÉFAUT ═══
+async function initAdmin() {
+  const snap = await db.ref('admin').get();
+  if (!snap.exists()) {
+    await db.ref('admin').set({ id: 'admin', password: 'maker2026' });
+  }
+}
+initAdmin();
+
+// ═══ SESSION ═══
+const saved = sessionStorage.getItem('ma_user');
+if (saved) {
+  currentUser = JSON.parse(saved);
+  if (currentUser.role === 'admin') { loadAdmin(); show('v-admin'); }
+  else {
+    db.ref('stagiaires/' + currentUser.id).get().then(snap => {
+      stagData = snap.val() || {};
+      loadStagiaire();
+      show('v-stag');
+    });
+  }
+}
+</script>
+</body>
+</html>
