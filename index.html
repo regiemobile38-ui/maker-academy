@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MAKER ACADEMY — Espace Formation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<style>
+:root{
+  --bg:#FAFAF8;--s1:#FFFFFF;--s2:#F2F1EE;--s3:#E8E7E3;
+  --blue:#1A6DD4;--blue-soft:rgba(26,109,212,0.08);
+  --orange:#E85D26;--og:rgba(232,93,38,0.08);--ob:rgba(232,93,38,0.25);
+  --text:#1a1a1a;--muted:#77756F;
+  --border2:rgba(0,0,0,0.12);
+  --green:#2E7D32;--green-bg:rgba(46,125,50,0.1);
+  --red:#C62828;--red-bg:rgba(198,40,40,0.08);
+  --r:14px;--font:'Space Grotesk',-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;}
+.view{display:none;min-height:100vh;padding-bottom:60px;}
+.view.active{display:block;}
+.hdr{padding:11px 16px;display:flex;align-items:center;justify-content:space-between;background:#0d0d0d;position:sticky;top:0;z-index:50;}
+.hdr-left{display:flex;align-items:center;gap:9px;}
+.hdr-logo{width:32px;height:32px;border-radius:8px;}
+.brand{font-size:14px;font-weight:700;color:#fff;}
+.brand .mk{color:var(--blue);}
+.brand .ac{color:var(--orange);}
+.hdr-badge{font-size:11px;color:#aaa;background:#1c1c1c;padding:4px 10px;border-radius:20px;border:0.5px solid #333;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ob{height:2px;background:var(--orange);}
+.card{background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r);padding:16px;margin:12px 14px 0;box-shadow:0 1px 3px rgba(0,0,0,0.04);}
+.sec-title{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin:16px 14px 8px;}
+.login-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:var(--bg);}
+.login-brand{text-align:center;margin-bottom:22px;}
+.login-logo{width:104px;height:104px;border-radius:24px;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,0.10);}
+.login-brand .big{font-size:25px;font-weight:700;color:var(--text);}
+.login-brand .big .mk{color:var(--blue);}
+.login-brand .big .ac{color:var(--orange);}
+.login-brand .sub{font-size:13px;color:var(--muted);margin-top:4px;}
+.login-card{background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r);padding:20px;width:100%;max-width:360px;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.login-title{font-size:17px;font-weight:700;margin-bottom:4px;}
+.login-sub{font-size:12px;color:var(--muted);margin-bottom:14px;}
+.mode-row{display:flex;gap:6px;margin-bottom:16px;}
+.mode-btn{flex:1;padding:11px;border:0.5px solid var(--border2);border-radius:8px;background:var(--s2);color:var(--muted);font-size:12.5px;cursor:pointer;text-align:center;font-family:var(--font);font-weight:500;touch-action:manipulation;-webkit-appearance:none;appearance:none;user-select:none;}
+.mode-btn.on{background:var(--og);color:var(--orange);border-color:var(--ob);font-weight:700;}
+.field{margin-bottom:11px;}
+.field label{font-size:10px;color:var(--muted);display:block;margin-bottom:5px;letter-spacing:0.05em;text-transform:uppercase;font-weight:600;}
+.field input,.field textarea,.field select{width:100%;padding:12px 13px;background:var(--s2);border:0.5px solid var(--border2);border-radius:10px;color:var(--text);font-size:15px;outline:none;font-family:var(--font);}
+.field textarea{min-height:110px;resize:vertical;font-size:14px;}
+.field input:focus,.field textarea:focus{border-color:var(--blue);}
+.btn{width:100%;padding:13px;background:var(--orange);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);touch-action:manipulation;}
+.btn:disabled{opacity:0.45;cursor:default;}
+.btn-blue{background:var(--blue);}
+.btn-outline{width:100%;padding:11px;background:transparent;color:var(--orange);border:0.5px solid var(--ob);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);margin-top:8px;touch-action:manipulation;}
+.err{font-size:12px;color:var(--red);margin-top:6px;display:none;}
+.login-note{font-size:11px;color:var(--muted);margin-top:12px;text-align:center;line-height:1.5;}
+.zoom-btn{display:block;margin:12px 14px 0;padding:13px;background:var(--blue);color:#fff;border-radius:10px;font-size:14px;font-weight:700;text-align:center;text-decoration:none;touch-action:manipulation;}
+.prog-wrap{padding:16px 14px 4px;}
+.prog-name{font-size:18px;font-weight:700;}
+.prog-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+.prog-bar{height:6px;background:var(--s3);border-radius:3px;margin-top:12px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--orange);border-radius:3px;transition:width 0.5s;}
+.prog-lbl{font-size:11px;color:var(--muted);margin-top:6px;}
+.session-bar{display:flex;gap:8px;margin:10px 14px 0;}
+.session-btn{flex:1;padding:11px;border:0.5px solid var(--border2);border-radius:10px;background:var(--s1);color:var(--text);font-size:12.5px;font-weight:600;cursor:pointer;text-align:center;font-family:var(--font);touch-action:manipulation;}
+.session-btn.live{border-color:var(--green);color:var(--green);background:var(--green-bg);}
+.mod-card{background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r);padding:14px;margin:0 14px 8px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,0.03);cursor:pointer;touch-action:manipulation;}
+.mod-card.locked{opacity:0.5;cursor:default;}
+.mod-card.current{border-color:var(--orange);border-width:1.5px;}
+.mod-num{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;}
+.mod-num.done{background:var(--green-bg);color:var(--green);}
+.mod-num.current{background:var(--og);color:var(--orange);}
+.mod-num.locked{background:var(--s2);color:var(--muted);}
+.mod-info{flex:1;}
+.mod-title{font-size:13px;font-weight:600;}
+.mod-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.mod-badge{font-size:10px;padding:3px 9px;border-radius:20px;font-weight:600;white-space:nowrap;}
+.mb-done{background:var(--green-bg);color:var(--green);}
+.mb-current{background:var(--og);color:var(--orange);}
+.mb-locked{background:var(--s2);color:var(--muted);}
+.mb-wait{background:rgba(232,160,48,0.12);color:#B87A10;}
+.retour-box{background:var(--og);border-left:3px solid var(--orange);border-radius:10px;padding:12px;margin:10px 0;font-size:12.5px;line-height:1.55;}
+.retour-box b{color:var(--orange);display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;}
+.cours-box{background:var(--blue-soft);border-left:3px solid var(--blue);border-radius:10px;padding:12px;margin:10px 0;font-size:12.5px;line-height:1.6;}
+.qcm-q{font-size:14px;font-weight:600;margin-bottom:10px;line-height:1.4;}
+.qcm-opt{background:var(--s2);border:0.5px solid var(--border2);border-radius:10px;padding:12px;margin-bottom:8px;font-size:13px;cursor:pointer;touch-action:manipulation;transition:all 0.15s;}
+.qcm-opt.sel{background:var(--blue-soft);border-color:var(--blue);font-weight:600;}
+.sig-wrap{border:1.5px dashed var(--border2);border-radius:10px;background:var(--s1);position:relative;}
+.sig-wrap canvas{width:100%;height:150px;border-radius:10px;touch-action:none;display:block;}
+.sig-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--s3);font-size:13px;pointer-events:none;}
+.sig-clear{padding:9px;border:0.5px solid var(--border2);border-radius:8px;background:var(--s2);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;text-align:center;font-family:var(--font);touch-action:manipulation;margin-top:8px;}
+.stars{display:flex;gap:8px;margin:6px 0 2px;}
+.star{font-size:30px;color:var(--s3);cursor:pointer;touch-action:manipulation;user-select:none;}
+.star.on{color:#E8A030;}
+.tabs{display:flex;background:var(--s1);border-bottom:0.5px solid var(--border2);}
+.tab{flex:1;padding:11px;text-align:center;font-size:12px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;touch-action:manipulation;}
+.tab.on{color:var(--orange);border-bottom-color:var(--orange);font-weight:700;}
+.stag-card{background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r);padding:13px;margin:0 14px 8px;box-shadow:0 1px 3px rgba(0,0,0,0.03);}
+.stag-top{display:flex;align-items:center;gap:10px;}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--blue);flex-shrink:0;}
+.stag-name{font-size:14px;font-weight:600;}
+.stag-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+.badge-mini{font-size:9.5px;padding:2px 8px;border-radius:20px;font-weight:600;margin-right:4px;}
+.bm-ok{background:var(--green-bg);color:var(--green);}
+.bm-no{background:var(--red-bg);color:var(--red);}
+.bm-sos{background:var(--red-bg);color:var(--red);}
+.row-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.act{padding:8px 12px;border:0.5px solid var(--border2);border-radius:8px;background:var(--s2);color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;text-align:center;font-family:var(--font);touch-action:manipulation;}
+.act.gr{border-color:rgba(46,125,50,0.3);color:var(--green);background:var(--green-bg);}
+.log-entry{background:var(--s1);border-left:2px solid var(--blue);border-radius:8px;padding:10px 12px;margin:0 14px 6px;font-size:11px;}
+.log-title{font-weight:600;color:var(--text);}
+.log-time{color:var(--muted);margin-top:2px;font-size:10px;}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px 14px 0;}
+.stat{background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r);padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.03);}
+.stat-val{font-size:24px;font-weight:700;color:var(--orange);}
+.stat-val.b{color:var(--blue);}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
+.modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:flex-end;justify-content:center;z-index:200;}
+.modal{background:var(--s1);border-radius:18px 18px 0 0;padding:20px 16px 36px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;}
+.modal-handle{width:32px;height:3px;background:var(--s3);border-radius:2px;margin:0 auto 16px;}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:4px;}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:16px;}
+.range-row{display:flex;align-items:center;gap:10px;margin:4px 0 14px;}
+.range-row input[type=range]{flex:1;}
+.range-val{width:34px;height:34px;border-radius:9px;background:var(--og);color:var(--orange);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;}
+.chk-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;font-size:13px;line-height:1.4;}
+.chk-row input{width:20px;height:20px;margin-top:1px;flex-shrink:0;}
+.article{margin-bottom:12px;}
+.article b{font-size:12px;color:var(--blue);display:block;margin-bottom:3px;}
+.article p{font-size:12.5px;line-height:1.55;color:var(--text);}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;border-radius:12px;padding:12px 18px;font-size:13px;color:#fff;z-index:999;display:none;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,0.3);}
+.empty{text-align:center;padding:32px 20px;color:var(--muted);font-size:14px;}
+.sos-btn{display:inline-block;padding:8px 14px;border:0.5px solid var(--red);border-radius:8px;background:var(--red-bg);color:var(--red);font-size:11.5px;font-weight:700;cursor:pointer;font-family:var(--font);touch-action:manipulation;margin-top:8px;}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+<div id="fatal" style="display:none;position:fixed;top:0;left:0;right:0;background:#C62828;color:#fff;padding:10px 14px;font-size:12px;z-index:9999;font-family:monospace;"></div>
+
+<!-- ═══ LOGIN / INSCRIPTION ═══ -->
+<div id="v-login" class="view active">
+  <div class="login-wrap">
+    <div class="login-brand">
+      <img class="login-logo" src="data:image/jpeg;base64,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" alt="MAKER ACADEMY"/>
+      <div class="big"><span class="mk">MAKER</span> <span class="ac">ACADEMY</span></div>
+      <div class="sub">Espace formation — Sourcing &amp; Création Produit</div>
+    </div>
+    <div class="login-card">
+      <div class="mode-row">
+        <button class="mode-btn on" id="mb-login" type="button" onclick="setMode('login')">Connexion</button>
+        <button class="mode-btn" id="mb-signup" type="button" onclick="setMode('signup')">Créer mon espace</button>
+      </div>
+
+      <div id="pane-login">
+        <div class="field"><label>Email</label><input type="email" id="l-email" placeholder="votre@email.fr" autocomplete="off" autocapitalize="none"/></div>
+        <div class="field"><label>Mot de passe</label><input type="password" id="l-pwd" placeholder="......"/></div>
+        <div class="err" id="l-err">Email ou mot de passe incorrect</div>
+        <button class="btn" style="margin-top:10px;" id="btn-login" type="button" onclick="doLogin()">Se connecter</button>
+      </div>
+
+      <div id="pane-signup" style="display:none;">
+        <div class="field"><label>Prénom et nom</label><input type="text" id="s-nom-in" placeholder="Ex: Jean-Pierre Martin"/></div>
+        <div class="field"><label>Email</label><input type="email" id="s-email-in" placeholder="votre@email.fr" autocapitalize="none"/></div>
+        <div class="field"><label>Mot de passe (6 caractères min.)</label><input type="password" id="s-pwd-in" placeholder="......"/></div>
+        <div class="err" id="s-err">Erreur</div>
+        <button class="btn btn-blue" style="margin-top:10px;" type="button" onclick="doSignup()">Créer mon espace stagiaire</button>
+      </div>
+
+      <div class="login-note" id="fb-status">Serveur : vérification...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ POSITIONNEMENT INITIAL ═══ -->
+<div id="v-position" class="view">
+  <div class="hdr">
+    <div class="hdr-left"><img class="hdr-logo" src="data:image/jpeg;base64,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" alt=""/><div class="brand"><span class="mk">MAKER</span> <span class="ac">ACADEMY</span></div></div>
+    <div class="hdr-badge">Positionnement</div>
+  </div>
+  <div class="ob"></div>
+  <div class="card">
+    <div style="font-size:16px;font-weight:700;margin-bottom:4px;">Questionnaire de positionnement</div>
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:16px;line-height:1.5;">Avant de commencer, évalue ton niveau de départ. Il n'y a pas de bonne ou mauvaise réponse — ces informations permettent au formateur d'adapter ton accompagnement.</div>
+
+    <div class="field"><label>Mon niveau en sourcing / achat en Chine (1 = débutant, 5 = expérimenté)</label>
+      <div class="range-row"><input type="range" min="1" max="5" value="1" id="p-q1" oninput="document.getElementById('p-v1').textContent=this.value"/><div class="range-val" id="p-v1">1</div></div>
+    </div>
+    <div class="field"><label>Mon aisance avec le numérique et les outils IA</label>
+      <div class="range-row"><input type="range" min="1" max="5" value="1" id="p-q2" oninput="document.getElementById('p-v2').textContent=this.value"/><div class="range-val" id="p-v2">1</div></div>
+    </div>
+    <div class="field"><label>Mon expérience en vente (en ligne ou physique)</label>
+      <div class="range-row"><input type="range" min="1" max="5" value="1" id="p-q3" oninput="document.getElementById('p-v3').textContent=this.value"/><div class="range-val" id="p-v3">1</div></div>
+    </div>
+    <div class="field"><label>Ton objectif principal avec cette formation</label>
+      <textarea id="p-objectif" placeholder="Ex: créer mon premier produit et le vendre..."></textarea>
+    </div>
+    <div class="field"><label>Mes engagements</label>
+      <div class="chk-row"><input type="checkbox" id="p-e1"/><span>Je m'engage à consacrer 1 heure par jour à la formation (lundi au vendredi, 2 semaines).</span></div>
+      <div class="chk-row"><input type="checkbox" id="p-e2"/><span>Je m'engage à réaliser les exercices avec des recherches réelles (vrais avis, vrais fournisseurs).</span></div>
+      <div class="chk-row"><input type="checkbox" id="p-e3"/><span>Je m'engage à participer à la visio de suivi à la fin de chaque module.</span></div>
+    </div>
+    <button class="btn" type="button" onclick="submitPosition()">Valider mon positionnement</button>
+  </div>
+</div>
+
+<!-- ═══ CONVENTION DE FORMATION ═══ -->
+<div id="v-convention" class="view">
+  <div class="hdr">
+    <div class="hdr-left"><img class="hdr-logo" src="data:image/jpeg;base64,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" alt=""/><div class="brand"><span class="mk">MAKER</span> <span class="ac">ACADEMY</span></div></div>
+    <div class="hdr-badge">Convention</div>
+  </div>
+  <div class="ob"></div>
+  <div class="card">
+    <div style="font-size:16px;font-weight:700;margin-bottom:4px;">Convention de formation</div>
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:14px;">Lis attentivement puis signe électroniquement pour accéder à ta formation.</div>
+
+    <div class="article"><b>ARTICLE 1 — OBJET DU CONTRAT</b><p>Le stagiaire s'engage à suivre la formation action : MAKER ACADEMY — Sourcing &amp; Création Produit. Le formateur s'engage à délivrer ladite formation conformément au programme pédagogique établi (Article L. 6353-3 du Code du travail).</p></div>
+    <div class="article"><b>ARTICLE 2 — DURÉE ET RYTHME</b><p>La formation se déroule sur une durée totale de 10 heures, réparties sur 2 semaines, à raison de 1 heure par jour du lundi au vendredi, avec une visio de suivi obligatoire à la fin de chaque module.</p></div>
+    <div class="article"><b>ARTICLE 3 — PRIX</b><p>Dans le cadre du lancement de la formation et de la réalisation d'une session test pour l'amélioration des supports pédagogiques, cette session est dispensée à titre gracieux. Coût total facturé au stagiaire : 0,00 €.</p></div>
+    <div class="article"><b>ARTICLE 4 — ASSIDUITÉ</b><p>Le stagiaire s'engage à respecter les horaires fixés, à participer activement aux sessions quotidiennes et à réaliser les exercices et QCM de validation des acquis. Présence minimum 80% requise pour l'attestation.</p></div>
+    <div class="article"><b>ARTICLE 5 — CONFIDENTIALITÉ ET USAGE</b><p>Les méthodes partagées sont confidentielles. Les outils enseignés ne peuvent être utilisés à des fins frauduleuses. Tout usage malveillant entraîne l'exclusion immédiate sans attestation.</p></div>
+
+    <div class="field" style="margin-top:14px;"><label>Tape exactement : Lu et approuvé</label><input type="text" id="c-mention" placeholder="Lu et approuvé" autocapitalize="none"/></div>
+    <div class="field"><label>Ton nom complet (signature)</label><input type="text" id="c-nom" placeholder="Prénom Nom"/></div>
+    <div class="err" id="c-err">Erreur</div>
+    <button class="btn" type="button" onclick="submitConvention()">Signer la convention</button>
+  </div>
+</div>
+
+<!-- ═══ STAGIAIRE ═══ -->
+<div id="v-stag" class="view">
+  <div class="hdr">
+    <div class="hdr-left"><img class="hdr-logo" src="data:image/jpeg;base64,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" alt=""/><div class="brand"><span class="mk">MAKER</span> <span class="ac">ACADEMY</span></div></div>
+    <div class="hdr-badge" id="s-badge">Stagiaire</div>
+  </div>
+  <div class="ob"></div>
+  <div class="prog-wrap">
+    <div class="prog-name" id="s-name">Bonjour</div>
+    <div class="prog-sub">Formation Sourcing &amp; Création Produit — 10h</div>
+    <div class="prog-bar"><div class="prog-fill" id="s-prog-fill" style="width:0%"></div></div>
+    <div class="prog-lbl" id="s-prog-lbl">0 module validé sur 5</div>
+  </div>
+  <a class="zoom-btn" href="https://zoom.us/j/9806942907" target="_blank" rel="noopener">Rejoindre la visio avec le formateur</a>
+  <div class="session-bar">
+    <button class="session-btn" id="btn-session" type="button" onclick="toggleSession()">Démarrer la session du jour</button>
+  </div>
+  <div class="sec-title">Votre parcours</div>
+  <div id="s-modules"></div>
+  <div id="s-satis-zone"></div>
+  <div style="padding:0 14px;margin-top:8px;">
+    <button class="btn-outline" type="button" onclick="logout()">Se déconnecter</button>
+  </div>
+</div>
+
+<!-- ═══ FORMATEUR ═══ -->
+<div id="v-admin" class="view">
+  <div class="hdr">
+    <div class="hdr-left"><img class="hdr-logo" src="data:image/jpeg;base64,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" alt=""/><div class="brand"><span class="mk">MAKER</span> <span class="ac">ACADEMY</span></div></div>
+    <div class="hdr-badge">Formateur</div>
+  </div>
+  <div class="ob"></div>
+  <div class="tabs">
+    <div class="tab on" id="t-stag" onclick="switchTab('stag')">Stagiaires</div>
+    <div class="tab" id="t-journal" onclick="switchTab('journal')">Journal</div>
+    <div class="tab" id="t-export" onclick="switchTab('export')">Export Qualiopi</div>
+  </div>
+  <div id="p-stag">
+    <div class="stats">
+      <div class="stat"><div class="stat-val" id="a-nb">0</div><div class="stat-lbl">Stagiaires</div></div>
+      <div class="stat"><div class="stat-val b" id="a-wait">0</div><div class="stat-lbl">Modules en attente</div></div>
+    </div>
+    <div class="sec-title">Suivi des stagiaires</div>
+    <div id="a-list"><div class="empty">Aucun stagiaire inscrit</div></div>
+  </div>
+  <div id="p-journal" style="display:none;">
+    <div class="sec-title">Journal horodaté — preuves Qualiopi</div>
+    <div id="a-journal"><div class="empty">Aucune activité</div></div>
+  </div>
+  <div id="p-export" style="display:none;">
+    <div class="card">
+      <div style="font-size:14px;font-weight:600;margin-bottom:6px;">Export CSV — normes OPCO / audit</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5;">Génère le fichier complet : organisme, stagiaires, positionnements, conventions signées, modules avec dates et feedbacks, feuille d'émargement des sessions, satisfaction.</div>
+      <button class="btn btn-blue" type="button" onclick="exportCSV()">Télécharger le CSV global</button>
+    </div>
+  </div>
+  <div style="padding:0 14px;margin-top:16px;">
+    <button class="btn-outline" type="button" onclick="logout()">Se déconnecter</button>
+  </div>
+</div>
+
+<!-- ═══ MODAL GÉNÉRIQUE ═══ -->
+<div id="m-modal" class="modal-bg" style="display:none;">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="mm-title"></div>
+    <div class="modal-sub" id="mm-sub"></div>
+    <div id="mm-body"></div>
+  </div>
+</div>
+
+<script>
+function showFatal(msg){var d=document.getElementById('fatal');if(d){d.textContent=msg;d.style.display='block';}}
+window.onerror=function(m,s,l){showFatal("Erreur JS : "+m+" (ligne "+l+")");};
+window.addEventListener('unhandledrejection',function(e){showFatal("Erreur : "+(e.reason&&e.reason.message?e.reason.message:e.reason));});
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBZy_xySurug2-WxD1j1h-9_ziCP7R7soQ",
+  authDomain: "maker-academy-18285.firebaseapp.com",
+  databaseURL: "https://maker-academy-18285-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "maker-academy-18285",
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+(async function(){
+  const st = document.getElementById('fb-status');
+  try {
+    await db.ref('config').get();
+    if(st){st.textContent="Serveur : connecté";st.style.color="#2E7D32";}
+  } catch(e) {
+    if(st){st.textContent="Serveur : ERREUR — "+(e.message||e);st.style.color="#C62828";}
+    showFatal("Firebase : "+(e.message||e)+" — vérifie les règles de la base");
+  }
+})();
+
+// ═══ MODULES — contenu enrichi terrain + Kotler ═══
+const MODULES = [
+  {
+    num: 1, titre: "Identifier une vraie opportunité produit",
+    cours: "Kotler distingue le besoin (ce qui manque), le désir (la forme que prend ce manque) et la demande (le désir + le pouvoir d'achat). Copier les bestsellers Amazon = entrer dans une guerre des prix sur une demande saturée. La vraie mine d'or : les avis négatifs — un produit qui se vend MAIS déçoit révèle une demande prouvée + une solution défaillante. Produit évident (une tasse : l'usage est connu) vs produit éducateur (il faut apprendre au client un nouvel usage — plus dur mais sans concurrence directe).",
+    retour: "INSO° est né comme ça : en observant les locations courte durée, j'ai vu un manque que personne ne comblait — l'accueil du voyageur à la porte. Personne ne cherchait ce produit, il n'existait pas. C'est un produit éducateur : je crée l'usage. Ton carnet de frustrations, c'est exactement ce réflexe : noter ce qui énerve au quotidien, parce que chaque frustration est une demande qui s'ignore.",
+    exo: "Carnet de frustrations : identifie 3 opportunités produit réelles. Pour chacune : (1) le problème observé dans TON quotidien, (2) va sur Amazon, trouve un produit existant qui essaie de le résoudre et COPIE-COLLE 2 avis négatifs réels, (3) explique ce que tu ferais mieux, (4) qui paierait et pourquoi.",
+    qcm: {
+      q: "Un produit se vend bien sur Amazon mais a 30% d'avis négatifs sur un défaut précis. Qu'est-ce que ça révèle ?",
+      opts: ["Un mauvais marché à éviter", "Une demande prouvée avec une solution défaillante — une opportunité", "Que le prix est trop élevé", "Que la marque est inconnue"],
+      bonne: 1
+    }
+  },
+  {
+    num: 2, titre: "Trouver et approcher le bon fournisseur",
+    cours: "L'écosystème chinois en un camembert : Alibaba = l'épicerie fine (intermédiaires, marge x3, interface en anglais). 1688 = directement à la ferme (les usines elles-mêmes, prix réels, interface en chinois — l'IA traduit tout). Le Guanxi (关系) : en Chine, la relation précède l'affaire. On ne parle pas prix à un inconnu. Lire une fiche fournisseur 1688 : ancienneté du compte, volume de transactions, notes, réactivité. Paiement : UNIQUEMENT via la plateforme (entiercement Alipay = le videur qui garde l'argent jusqu'à ce que la musique soit bonne).",
+    retour: "Un fournisseur m'a demandé un paiement Western Union hors plateforme avec un prix cassé. J'ai coupé net — c'est LE red flag absolu. Ceux qui acceptent perdent tout, sans recours. Mes règles absolues : entiercement plateforme, jamais PayPal entre amis, jamais Wise direct, jamais WeChat non vérifié. La sécurité du paiement passe avant la remise.",
+    exo: "Va sur 1688.com (avec traduction automatique du navigateur). Trouve UN vrai fournisseur pour un des 3 produits de ton Module 1. Colle ici : le lien de la fiche, l'ancienneté du compte, le prix affiché, et rédige avec l'IA ton premier message de contact en respectant le Guanxi (présentation, intérêt sincère, question sur leur savoir-faire — PAS de négociation de prix au premier message).",
+    qcm: {
+      q: "Une usine te propose -30% si tu paies par Western Union hors plateforme. Que fais-tu ?",
+      opts: ["J'accepte, l'économie est réelle", "Je négocie -20% pour être prudent", "Je refuse et je coupe le contact — aucun recours possible hors entiercement", "Je demande une vidéo de l'usine d'abord"],
+      bonne: 2
+    }
+  },
+  {
+    num: 3, titre: "Passer sa première commande",
+    cours: "L'échantillon est NON négociable : matériaux, finitions, fonctionnement, packaging, marquages. Le piège classique : échantillon parfait, série dégradée — l'usine récupère sa marge sur ce qui ne se voit pas. D'où la règle : négocier la qualité, pas le prix. Le contrôleur qualité sur 1688 : son adresse devient l'adresse de livraison, il inspecte AVANT l'expédition internationale, retour usine gratuit sous 5 jours si non conforme. DDP (Delivered Duty Paid) : le fret arrive dédouané devant ta porte — l'incoterm du débutant intelligent. Prix de revient complet = produit + packaging + fret DDP + contrôle, AVANT de fixer ton prix de vente.",
+    retour: "Ma phrase avec les usines : je respecte vos prix, respectez la qualité. Mieux vaut +0,50 € sur ton prix client que -0,50 € arrachés à l'usine qui se rattrapera sur les composants. Mon dernier envoi groupé : 26 kg livrés DDP devant ma porte pour 240 €, soit environ 9 €/kg tout compris via mon transitaire à Canton. C'est ça, la logistique maîtrisée.",
+    exo: "Calcule le prix de revient complet du produit que tu as sourcé au Module 2 : prix usine unitaire + packaging estimé + fret DDP (utilise 9 €/kg et estime le poids) + 0,30 € de contrôle qualité. Puis fixe ton prix de vente pour une marge de 60% minimum. Montre tout ton calcul.",
+    qcm: {
+      q: "Pourquoi ne faut-il pas écraser le prix d'une usine partenaire ?",
+      opts: ["C'est mal vu culturellement", "L'usine récupère sa marge en dégradant ce qui ne se voit pas (composants, finitions)", "Les prix usine sont fixés par l'État", "Ça rallonge les délais de production"],
+      bonne: 1
+    }
+  },
+  {
+    num: 4, titre: "Créer son produit physique de A à Z",
+    cours: "Kotler : les 5 niveaux du produit — du bénéfice central (ce que le client achète VRAIMENT) au produit augmenté (services, garantie, expérience). L'itération par le bon sens : la question clé avant chaque choix technique est « l'utilisateur maintiendra-t-il ce comportement dans 6 mois ? ». Le design avec l'IA : décris en français → ChatGPT structure le prompt → Gemini génère le visuel → tu affines → tu envoies à l'usine. Le packaging se source séparément (usine boîte + usine impression). Le brief usine : dimensions, matériaux, couleurs Pantone, quantités, packaging — rédigé en anglais avec l'IA.",
+    retour: "INSO° a pivoté du LCD vers l'e-ink pour UNE raison : l'autonomie. Personne ne recharge sa porte chaque semaine — dans 6 mois, l'écran serait resté noir. J'ai aussi repositionné le prix de 49 € à 89 € : un prix trop bas dévalorise un produit éducateur. Et tous mes visuels produit sont nés du duo ChatGPT + Gemini avant d'aller à l'usine.",
+    exo: "Rédige le brief usine complet de TON produit : bénéfice central en une phrase, dimensions, matériaux, couleurs, quantité envisagée, packaging souhaité. Puis fais-le traduire en anglais professionnel par l'IA et colle les deux versions.",
+    qcm: {
+      q: "INSO° a pivoté du LCD vers l'e-ink. Quelle question a guidé cette décision ?",
+      opts: ["Quel écran est le moins cher ?", "Quel écran est le plus lumineux ?", "L'utilisateur maintiendra-t-il ce comportement (recharger) dans 6 mois ?", "Quel écran se fabrique le plus vite ?"],
+      bonne: 2
+    }
+  },
+  {
+    num: 5, titre: "Lancer et vendre — B2C ou B2B, jusqu'à la première vente",
+    cours: "Deux mondes, deux approches. B2C (vendre au consommateur) : beaucoup de petites ventes, décision émotionnelle, canal roi = la vidéo courte. Structure TikTok qui convertit : 0-3s accroche (sortir de la prison des 300 vues), 3-8s problème, 8-15s solution en action, 15-30s appel à l'action. B2B (vendre aux professionnels) : moins de clients mais paniers plus gros, décision rationnelle (ROI, temps gagné), cycle plus long, la relation avant le prix, canal roi = prescripteurs et recommandation. Kotler STP : Segmenter, cibler (Targeting), se positionner. Ton canal naturel est celui que tu peux tenir 6 mois sans t'épuiser — forcer un canal qui épuise mène à l'abandon.",
+    retour: "J'ai vécu les deux : mes boutons SOS vendus en B2C, TikTok organique, zéro budget pub — l'émotion et la démonstration font tout. Et INSO° en B2B : 22 emails à des conciergeries, des DMs ciblés, un coach avec des élèves comme prescripteur. En B2B, personne n'achète à un inconnu : la confiance se construit AVANT de parler prix — c'est le Guanxi version française. Choisis selon TON produit : gadget grand public = B2C ; produit qui fait gagner du temps à des pros = B2B.",
+    exo: "Choisis l'approche adaptée à TON produit et justifie en 3 lignes. Puis produis le livrable : si B2C, écris le script complet de ta première vidéo TikTok (accroche 0-3s / problème / solution / appel à l'action). Si B2B, écris ton premier message de prospection à un professionnel réel (nomme le type de pro visé) : accroche personnalisée, problème que tu résous, proposition simple, sans lien au premier message.",
+    qcm: {
+      q: "Ton produit fait gagner 2h par semaine à des conciergeries Airbnb. Quelle approche prioriser ?",
+      opts: ["B2C : des pubs TikTok grand public", "B2B : prescripteurs et prospection directe des conciergeries, relation avant le prix", "Les deux en même temps dès le départ", "Attendre que les clients viennent seuls"],
+      bonne: 1
+    }
+  }
+];
+
+// ═══ STATE ═══
+let user = null;
+let allStag = {};
+let allProgress = {};
+let allSos = {};
+let allSessions = {};
+let allSatis = {};
+let currentModule = null;
+let qcmSelected = null;
+let sigCanvas = null, sigCtx = null, sigDrawn = false;
+let sessionStart = null;
+let autosaveTimer = null;
+
+function emailKey(email){ return email.trim().toLowerCase().replace(/[.#$\[\]\/]/g, "_"); }
+function show(id){ document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',2500); }
+async function logAction(action, detail){
+  await db.ref('journal').push({action:action, detail:detail||"", user:user?user.nom:"Système", timestamp:Date.now(), date:new Date().toLocaleString('fr-FR')});
+}
+
+// ═══ LOGIN / SIGNUP ═══
+window.setMode = function(m){
+  document.getElementById('mb-login').classList.toggle('on', m==='login');
+  document.getElementById('mb-signup').classList.toggle('on', m==='signup');
+  document.getElementById('pane-login').style.display = m==='login'?'block':'none';
+  document.getElementById('pane-signup').style.display = m==='signup'?'block':'none';
+};
+
+window.doSignup = async function(){
+  try {
+    const nom = document.getElementById('s-nom-in').value.trim();
+    const email = document.getElementById('s-email-in').value.trim().toLowerCase();
+    const pwd = document.getElementById('s-pwd-in').value;
+    const err = document.getElementById('s-err');
+    err.style.display='none';
+    if(!nom || nom.split(' ').length<2){ err.textContent="Indique ton prénom ET ton nom"; err.style.display='block'; return; }
+    if(!email.includes('@') || !email.includes('.')){ err.textContent="Email invalide"; err.style.display='block'; return; }
+    if(pwd.length<6){ err.textContent="Mot de passe : 6 caractères minimum"; err.style.display='block'; return; }
+    const key = emailKey(email);
+    const snap = await db.ref('stagiaires/'+key).get();
+    if(snap.exists()){ err.textContent="Un espace existe déjà avec cet email"; err.style.display='block'; return; }
+    await db.ref('stagiaires/'+key).set({nom:nom, email:email, password:pwd, createdAt:Date.now(), dateInscription:new Date().toLocaleString('fr-FR')});
+    user = {role:'stagiaire', id:key, nom:nom, email:email};
+    sessionStorage.setItem('ma_user', JSON.stringify(user));
+    await logAction("Espace stagiaire créé", nom+" ("+email+")");
+    toast("Bienvenue "+nom.split(' ')[0]+" !");
+    routeStagiaire();
+  } catch(e){ showFatal("Inscription impossible : "+(e.message||e)); }
+};
+
+async function getAdminCfg(){
+  let snap = await db.ref('config/admin').get();
+  if(snap.exists()) return snap.val();
+  snap = await db.ref('Config/admin').get();
+  if(snap.exists()) return snap.val();
+  return {};
+}
+
+window.doLogin = async function(){
+  try {
+    const email = document.getElementById('l-email').value.trim().toLowerCase();
+    const pwd = document.getElementById('l-pwd').value;
+    const err = document.getElementById('l-err');
+    err.style.display='none';
+    if(!email || !pwd){ err.style.display='block'; return; }
+
+    // Auto-détection formateur (admin / admin123 par défaut)
+    const cfg = await getAdminCfg();
+    const adminId = (cfg.id||"admin").toLowerCase();
+    const adminPwd = cfg.password||"admin123";
+    if(email===adminId && pwd===adminPwd){
+      user = {role:'formateur', id:'admin', nom:'Formateur'};
+      sessionStorage.setItem('ma_user', JSON.stringify(user));
+      loadAdmin(); show('v-admin');
+      logAction("Connexion formateur");
+      return;
+    }
+
+    const key = emailKey(email);
+    const snap = await db.ref('stagiaires/'+key).get();
+    if(!snap.exists()){ err.style.display='block'; return; }
+    const s = snap.val();
+    if(s.password!==pwd){ err.style.display='block'; return; }
+    user = {role:'stagiaire', id:key, nom:s.nom, email:s.email};
+    sessionStorage.setItem('ma_user', JSON.stringify(user));
+    logAction("Connexion stagiaire", s.nom);
+    routeStagiaire();
+  } catch(e){ showFatal("Connexion impossible : "+(e.message||e)); }
+};
+
+window.logout = function(){
+  sessionStorage.removeItem('ma_user');
+  user=null;
+  document.getElementById('l-email').value='';
+  document.getElementById('l-pwd').value='';
+  show('v-login');
+};
+
+// ═══ ROUTAGE STAGIAIRE : positionnement → convention → modules ═══
+async function routeStagiaire(){
+  const snap = await db.ref('stagiaires/'+user.id).get();
+  const s = snap.val()||{};
+  if(!s.positionnement){ show('v-position'); return; }
+  if(!s.convention){ show('v-convention'); return; }
+  loadStag(); show('v-stag');
+}
+
+// ═══ POSITIONNEMENT ═══
+window.submitPosition = async function(){
+  try {
+    const q1 = document.getElementById('p-q1').value;
+    const q2 = document.getElementById('p-q2').value;
+    const q3 = document.getElementById('p-q3').value;
+    const obj = document.getElementById('p-objectif').value.trim();
+    if(!obj){ toast("Décris ton objectif"); return; }
+    if(!document.getElementById('p-e1').checked || !document.getElementById('p-e2').checked || !document.getElementById('p-e3').checked){
+      toast("Coche les 3 engagements"); return;
+    }
+    await db.ref('stagiaires/'+user.id+'/positionnement').set({
+      sourcing:q1, numerique:q2, vente:q3, objectif:obj,
+      engagements:true, date:new Date().toLocaleString('fr-FR'), timestamp:Date.now()
+    });
+    await logAction("Positionnement complété", user.nom+" — sourcing "+q1+"/5, numérique "+q2+"/5, vente "+q3+"/5");
+    toast("Positionnement enregistré");
+    routeStagiaire();
+  } catch(e){ showFatal("Erreur positionnement : "+(e.message||e)); }
+};
+
+// ═══ CONVENTION ═══
+window.submitConvention = async function(){
+  try {
+    const mention = document.getElementById('c-mention').value.trim().toLowerCase();
+    const nom = document.getElementById('c-nom').value.trim();
+    const err = document.getElementById('c-err');
+    err.style.display='none';
+    if(mention!=="lu et approuvé" && mention!=="lu et approuve"){ err.textContent='Tape exactement : Lu et approuvé'; err.style.display='block'; return; }
+    if(!nom || nom.split(' ').length<2){ err.textContent="Signe avec ton prénom ET ton nom"; err.style.display='block'; return; }
+    let ip = "non disponible";
+    try {
+      const r = await fetch('https://api.ipify.org?format=json');
+      const j = await r.json(); ip = j.ip||ip;
+    } catch(e){}
+    await db.ref('stagiaires/'+user.id+'/convention').set({
+      signataire:nom, mention:"Lu et approuvé", ip:ip,
+      date:new Date().toLocaleString('fr-FR'), timestamp:Date.now()
+    });
+    await logAction("Convention signée", user.nom+" — signataire : "+nom+" — IP : "+ip);
+    toast("Convention signée");
+    routeStagiaire();
+  } catch(e){ showFatal("Erreur convention : "+(e.message||e)); }
+};
+
+// ═══ SESSIONS (émargement) ═══
+window.toggleSession = async function(){
+  try {
+    const btn = document.getElementById('btn-session');
+    if(!sessionStart){
+      sessionStart = Date.now();
+      btn.textContent = "Terminer la session (en cours...)";
+      btn.classList.add('live');
+      await logAction("Session démarrée", user.nom);
+      toast("Session démarrée — bon travail");
+    } else {
+      const fin = Date.now();
+      const duree = Math.round((fin-sessionStart)/60000);
+      await db.ref('sessions/'+user.id).push({
+        debut:new Date(sessionStart).toLocaleString('fr-FR'),
+        fin:new Date(fin).toLocaleString('fr-FR'),
+        dureeMin:duree, timestamp:sessionStart
+      });
+      await logAction("Session terminée", user.nom+" — "+duree+" min");
+      toast("Session enregistrée : "+duree+" min");
+      sessionStart = null;
+      btn.textContent = "Démarrer la session du jour";
+      btn.classList.remove('live');
+    }
+  } catch(e){ showFatal("Erreur session : "+(e.message||e)); }
+};
+
+// ═══ STAGIAIRE — MODULES ═══
+function loadStag(){
+  document.getElementById('s-name').textContent = "Bonjour, "+user.nom.split(' ')[0];
+  document.getElementById('s-badge').textContent = user.nom;
+  db.ref('progress/'+user.id).on('value', snap => { renderStagModules(snap.val()||{}); });
+  db.ref('satisfaction/'+user.id).on('value', snap => { renderSatisZone(snap.val()); });
+}
+
+function renderStagModules(prog){
+  let done = 0;
+  MODULES.forEach(m => { if(prog['m'+m.num] && prog['m'+m.num].statut==='valide') done++; });
+  document.getElementById('s-prog-fill').style.width = (done/5*100)+"%";
+  document.getElementById('s-prog-lbl').textContent = done+" module"+(done>1?"s":"")+" validé"+(done>1?"s":"")+" sur 5 — "+Math.round(done/5*100)+"%";
+  window._stagDone = done;
+
+  let html = "";
+  MODULES.forEach((m,i) => {
+    const p = prog['m'+m.num]||{};
+    const prevDone = i===0 || (prog['m'+MODULES[i-1].num] && prog['m'+MODULES[i-1].num].statut==='valide');
+    let state, badge, numCls, icon;
+    if(p.statut==='valide'){ state='done'; badge='<span class="mod-badge mb-done">Validé</span>'; numCls='done'; icon='OK'; }
+    else if(p.statut==='soumis'){ state='wait'; badge='<span class="mod-badge mb-wait">En validation</span>'; numCls='current'; icon=m.num; }
+    else if(prevDone){ state='current'; badge='<span class="mod-badge mb-current">À faire</span>'; numCls='current'; icon=m.num; }
+    else { state='locked'; badge='<span class="mod-badge mb-locked">Verrouillé</span>'; numCls='locked'; icon='—'; }
+    const clickable = (state==='current') ? 'onclick="openModule('+m.num+')"' : '';
+    let subtxt = "";
+    if(state==='done'){ subtxt = "Validé le "+(p.dateValidation||"")+(p.feedback?" — feedback formateur disponible":""); }
+    else if(state==='wait'){ subtxt = "Soumis — validation du formateur en cours"; }
+    else if(state==='current'){ subtxt = "Cours + exercice terrain + QCM + signature"; }
+    else { subtxt = "Débloqué après validation du module "+(m.num-1); }
+    html += '<div class="mod-card '+(state==='locked'?'locked':'')+' '+(state==='current'?'current':'')+'" '+clickable+'>'+
+      '<div class="mod-num '+numCls+'">'+icon+'</div>'+
+      '<div class="mod-info"><div class="mod-title">Module '+m.num+' — '+m.titre+'</div>'+
+      '<div class="mod-sub">'+subtxt+'</div></div>'+badge+'</div>';
+    if(state==='done' && p.feedback){
+      html += '<div class="retour-box" style="margin:0 14px 8px;"><b>Feedback du formateur — Module '+m.num+'</b>'+p.feedback+'</div>';
+    }
+  });
+  document.getElementById('s-modules').innerHTML = html;
+}
+
+function renderSatisZone(satis){
+  const zone = document.getElementById('s-satis-zone');
+  if(satis){ zone.innerHTML = '<div class="card" style="text-align:center;"><div style="font-size:14px;font-weight:700;color:var(--green);">Formation terminée — merci pour ton retour !</div><div style="font-size:12px;color:var(--muted);margin-top:4px;">Ton questionnaire de satisfaction a bien été enregistré.</div></div>'; return; }
+  if((window._stagDone||0)>=5){
+    zone.innerHTML = '<div class="card"><div style="font-size:14px;font-weight:700;margin-bottom:4px;">Questionnaire de satisfaction</div><div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Dernière étape de ta formation.</div><button class="btn" type="button" onclick="openSatisfaction()">Donner mon avis</button></div>';
+  } else { zone.innerHTML = ""; }
+}
+
+// ═══ MODAL MODULE ═══
+window.openModule = function(num){
+  currentModule = MODULES.find(m=>m.num===num);
+  qcmSelected = null;
+  sigDrawn = false;
+  document.getElementById('mm-title').textContent = "Module "+num+" — "+currentModule.titre;
+  document.getElementById('mm-sub').textContent = "Cours, exercice terrain, QCM et signature électronique";
+
+  let qcmHtml = "";
+  currentModule.qcm.opts.forEach((opt,i) => {
+    qcmHtml += '<div class="qcm-opt" id="qcm-'+i+'" onclick="selectQcm('+i+')">'+opt+'</div>';
+  });
+
+  document.getElementById('mm-body').innerHTML =
+    '<div class="cours-box"><b style="color:var(--blue);display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;">L\u2019essentiel du module</b>'+currentModule.cours+'</div>'+
+    '<div class="retour-box"><b>Retour d\u2019expérience — Ton formateur</b>'+currentModule.retour+'</div>'+
+    '<div class="field" style="margin-top:14px;"><label>Exercice terrain</label>'+
+    '<div style="font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:8px;">'+currentModule.exo+'</div>'+
+    '<textarea id="exo-answer" placeholder="Rédige ta réponse complète ici (brouillon sauvegardé automatiquement)..."></textarea></div>'+
+    '<div class="field" style="margin-top:14px;"><label>QCM de validation</label>'+
+    '<div class="qcm-q">'+currentModule.qcm.q+'</div>'+qcmHtml+
+    '<div style="font-size:11px;color:var(--muted);">La correction sera visible après validation par le formateur.</div></div>'+
+    '<button class="sos-btn" type="button" onclick="openSOS('+num+')">SOS — je rencontre une difficulté</button>'+
+    '<div class="field" style="margin-top:14px;"><label>Signature électronique — je certifie avoir réalisé ce module moi-même</label>'+
+    '<div class="sig-wrap"><canvas id="sig-canvas"></canvas><div class="sig-hint" id="sig-hint">Signe ici avec le doigt</div></div>'+
+    '<div class="sig-clear" onclick="clearSig()">Effacer la signature</div></div>'+
+    '<button class="btn" style="margin-top:14px;" type="button" onclick="submitModule()">Soumettre le module</button>'+
+    '<button class="btn-outline" type="button" onclick="closeModal()">Fermer</button>';
+  document.getElementById('m-modal').style.display='flex';
+  setTimeout(initSig,150);
+  restoreDraft(num);
+  const ta = document.getElementById('exo-answer');
+  ta.addEventListener('input', function(){
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(function(){
+      db.ref('brouillons/'+user.id+'/m'+num).set(ta.value);
+    }, 1500);
+  });
+};
+
+async function restoreDraft(num){
+  try {
+    const snap = await db.ref('brouillons/'+user.id+'/m'+num).get();
+    if(snap.exists()){ const ta=document.getElementById('exo-answer'); if(ta && !ta.value) ta.value = snap.val(); }
+  } catch(e){}
+}
+
+window.closeModal = function(){ document.getElementById('m-modal').style.display='none'; };
+
+window.selectQcm = function(i){
+  qcmSelected = i;
+  currentModule.qcm.opts.forEach((_,j) => {
+    document.getElementById('qcm-'+j).classList.toggle('sel', j===i);
+  });
+};
+
+// ═══ SOS ═══
+window.openSOS = function(num){
+  const msg = prompt("Décris ta difficulté sur le module "+num+" — le formateur sera prévenu :");
+  if(msg && msg.trim()){
+    db.ref('sos/'+user.id).push({module:num, message:msg.trim(), date:new Date().toLocaleString('fr-FR'), timestamp:Date.now(), resolu:false});
+    logAction("SOS Module "+num, user.nom+" — "+msg.trim());
+    toast("SOS envoyé au formateur");
+  }
+};
+
+// ═══ SIGNATURE ═══
+function initSig(){
+  sigCanvas = document.getElementById('sig-canvas');
+  if(!sigCanvas) return;
+  const rect = sigCanvas.getBoundingClientRect();
+  sigCanvas.width = rect.width*2;
+  sigCanvas.height = 300;
+  sigCtx = sigCanvas.getContext('2d');
+  sigCtx.scale(2,2);
+  sigCtx.strokeStyle = "#1a1a1a";
+  sigCtx.lineWidth = 2;
+  sigCtx.lineCap = "round";
+  let drawing=false, lastX=0, lastY=0;
+  function pos(e){ const r=sigCanvas.getBoundingClientRect(); const t=e.touches?e.touches[0]:e; return {x:t.clientX-r.left, y:t.clientY-r.top}; }
+  function start(e){ e.preventDefault(); drawing=true; const p=pos(e); lastX=p.x; lastY=p.y; }
+  function move(e){
+    if(!drawing) return; e.preventDefault();
+    const p=pos(e);
+    sigCtx.beginPath(); sigCtx.moveTo(lastX,lastY); sigCtx.lineTo(p.x,p.y); sigCtx.stroke();
+    lastX=p.x; lastY=p.y; sigDrawn=true;
+    document.getElementById('sig-hint').style.display='none';
+  }
+  function end(){ drawing=false; }
+  sigCanvas.addEventListener('touchstart',start,{passive:false});
+  sigCanvas.addEventListener('touchmove',move,{passive:false});
+  sigCanvas.addEventListener('touchend',end);
+  sigCanvas.addEventListener('mousedown',start);
+  sigCanvas.addEventListener('mousemove',move);
+  sigCanvas.addEventListener('mouseup',end);
+}
+window.clearSig = function(){
+  if(sigCtx){ sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height); sigDrawn=false; document.getElementById('sig-hint').style.display='block'; }
+};
+
+// ═══ SOUMISSION MODULE ═══
+window.submitModule = async function(){
+  try {
+    const answer = document.getElementById('exo-answer').value.trim();
+    if(answer.length<100){ toast("Ta réponse est trop courte — développe ton travail terrain"); return; }
+    if(qcmSelected===null){ toast("Réponds au QCM"); return; }
+    if(!sigDrawn){ toast("Signature obligatoire"); return; }
+    const qcmOk = qcmSelected===currentModule.qcm.bonne;
+    const sigData = sigCanvas.toDataURL('image/png');
+    await db.ref('progress/'+user.id+'/m'+currentModule.num).set({
+      statut:'soumis', exercice:answer, qcmReponse:qcmSelected, qcmCorrect:qcmOk,
+      signature:sigData, dateSoumission:new Date().toLocaleString('fr-FR'), timestamp:Date.now()
+    });
+    await db.ref('brouillons/'+user.id+'/m'+currentModule.num).remove();
+    await logAction("Module "+currentModule.num+" soumis", user.nom+" — QCM "+(qcmOk?"correct":"incorrect")+" — signé électroniquement");
+    closeModal();
+    toast("Module "+currentModule.num+" soumis au formateur");
+  } catch(e){ showFatal("Erreur soumission : "+(e.message||e)); }
+};
+
+// ═══ SATISFACTION ═══
+let satisNotes = {contenu:0, accompagnement:0, plateforme:0, recommandation:0};
+window.openSatisfaction = function(){
+  document.getElementById('mm-title').textContent = "Questionnaire de satisfaction";
+  document.getElementById('mm-sub').textContent = "Ton avis compte pour améliorer la formation";
+  satisNotes = {contenu:0, accompagnement:0, plateforme:0, recommandation:0};
+  function starsRow(key, label){
+    let s = '<div class="field"><label>'+label+'</label><div class="stars" id="st-'+key+'">';
+    for(let i=1;i<=5;i++){ s += '<span class="star" onclick="setStar(\u0027'+key+'\u0027,'+i+')">\u2605</span>'; }
+    return s+'</div></div>';
+  }
+  document.getElementById('mm-body').innerHTML =
+    starsRow('contenu',"Qualité du contenu de la formation")+
+    starsRow('accompagnement',"Accompagnement du formateur")+
+    starsRow('plateforme',"Facilité d\u2019utilisation de la plateforme")+
+    starsRow('recommandation',"Recommanderais-tu cette formation ?")+
+    '<div class="field"><label>Commentaire libre</label><textarea id="satis-comment" placeholder="Ce que tu as aimé, ce qui peut être amélioré..."></textarea></div>'+
+    '<button class="btn" type="button" onclick="submitSatisfaction()">Envoyer mon avis</button>'+
+    '<button class="btn-outline" type="button" onclick="closeModal()">Plus tard</button>';
+  document.getElementById('m-modal').style.display='flex';
+};
+window.setStar = function(key, n){
+  satisNotes[key] = n;
+  const row = document.getElementById('st-'+key);
+  Array.from(row.children).forEach((el,i)=>{ el.classList.toggle('on', i<n); });
+};
+window.submitSatisfaction = async function(){
+  try {
+    if(satisNotes.contenu===0 || satisNotes.accompagnement===0 || satisNotes.plateforme===0 || satisNotes.recommandation===0){
+      toast("Note les 4 critères"); return;
+    }
+    const comment = document.getElementById('satis-comment').value.trim();
+    await db.ref('satisfaction/'+user.id).set({
+      notes:satisNotes, commentaire:comment,
+      date:new Date().toLocaleString('fr-FR'), timestamp:Date.now()
+    });
+    await logAction("Satisfaction remplie", user.nom+" — contenu "+satisNotes.contenu+"/5, accompagnement "+satisNotes.accompagnement+"/5");
+    closeModal();
+    toast("Merci pour ton retour !");
+  } catch(e){ showFatal("Erreur satisfaction : "+(e.message||e)); }
+};
+
+// ═══ ADMIN ═══
+function loadAdmin(){
+  db.ref('stagiaires').on('value', snap => { allStag=snap.val()||{}; renderAdminStag(); });
+  db.ref('progress').on('value', snap => { allProgress=snap.val()||{}; renderAdminStag(); });
+  db.ref('sos').on('value', snap => { allSos=snap.val()||{}; renderAdminStag(); });
+  db.ref('sessions').on('value', snap => { allSessions=snap.val()||{}; });
+  db.ref('satisfaction').on('value', snap => { allSatis=snap.val()||{}; });
+  db.ref('journal').limitToLast(80).on('value', snap => { renderJournal(snap.val()||{}); });
+}
+
+function renderAdminStag(){
+  const list = Object.entries(allStag);
+  document.getElementById('a-nb').textContent = list.length;
+  let waitCount = 0;
+  Object.values(allProgress).forEach(p => { Object.values(p||{}).forEach(m => { if(m.statut==='soumis') waitCount++; }); });
+  document.getElementById('a-wait').textContent = waitCount;
+
+  if(!list.length){ document.getElementById('a-list').innerHTML='<div class="empty">Aucun stagiaire inscrit</div>'; return; }
+
+  let html = "";
+  list.forEach(([id,s]) => {
+    const prog = allProgress[id]||{};
+    let done=0, pending=null;
+    MODULES.forEach(m => {
+      const p = prog['m'+m.num];
+      if(p && p.statut==='valide') done++;
+      if(p && p.statut==='soumis' && !pending) pending=m.num;
+    });
+    const sosArr = Object.values(allSos[id]||{}).filter(x=>!x.resolu);
+    const initials = (s.nom||"?").split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    const convBadge = s.convention ? '<span class="badge-mini bm-ok">Convention signée</span>' : '<span class="badge-mini bm-no">Convention manquante</span>';
+    const posBadge = s.positionnement ? '<span class="badge-mini bm-ok">Positionnement OK</span>' : '<span class="badge-mini bm-no">Positionnement manquant</span>';
+    const sosBadge = sosArr.length ? '<span class="badge-mini bm-sos">SOS ('+sosArr.length+')</span>' : '';
+    let actions = '<div class="row-actions">';
+    if(pending){
+      actions += '<div class="act" onclick="viewSubmission(\u0027'+id+'\u0027,'+pending+')">Voir M'+pending+'</div>';
+    }
+    actions += '<div class="act" onclick="viewFiche(\u0027'+id+'\u0027)">Fiche</div>';
+    actions += '<div class="act" onclick="exportCSVStag(\u0027'+id+'\u0027)">CSV</div>';
+    actions += '<div class="act" onclick="delStag(\u0027'+id+'\u0027)">Suppr.</div>';
+    actions += '</div>';
+    html += '<div class="stag-card"><div class="stag-top">'+
+      '<div class="avatar">'+initials+'</div>'+
+      '<div style="flex:1;"><div class="stag-name">'+s.nom+'</div>'+
+      '<div class="stag-sub">'+(s.email||"")+' — '+done+'/5 modules'+(pending?" — M"+pending+" en attente":"")+'</div>'+
+      '<div style="margin-top:5px;">'+convBadge+posBadge+sosBadge+'</div></div></div>'+
+      '<div class="prog-bar" style="margin-top:10px;"><div class="prog-fill" style="width:'+(done/5*100)+'%"></div></div>'+
+      actions+'</div>';
+  });
+  document.getElementById('a-list').innerHTML = html;
+}
+
+// ═══ FICHE STAGIAIRE (positionnement + convention + SOS + satisfaction) ═══
+window.viewFiche = function(id){
+  const s = allStag[id]||{};
+  const pos = s.positionnement;
+  const conv = s.convention;
+  const sosArr = Object.values(allSos[id]||{});
+  const sess = Object.values(allSessions[id]||{});
+  const satis = allSatis[id];
+  let h = "";
+  if(pos){
+    h += '<div class="cours-box"><b style="color:var(--blue);display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;">Positionnement — '+(pos.date||"")+'</b>'+
+    'Sourcing : '+pos.sourcing+'/5 — Numérique/IA : '+pos.numerique+'/5 — Vente : '+pos.vente+'/5<br>Objectif : '+pos.objectif+'</div>';
+  } else { h += '<div class="err" style="display:block;">Positionnement non complété</div>'; }
+  if(conv){
+    h += '<div class="cours-box"><b style="color:var(--blue);display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;">Convention — signée le '+(conv.date||"")+'</b>Signataire : '+conv.signataire+' — Mention : '+conv.mention+' — IP : '+conv.ip+'</div>';
+  } else { h += '<div class="err" style="display:block;">Convention non signée</div>'; }
+  if(sess.length){
+    let tot = sess.reduce((a,x)=>a+(x.dureeMin||0),0);
+    h += '<div class="cours-box"><b style="color:var(--blue);display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;">Émargement — '+sess.length+' sessions, '+tot+' min au total</b>';
+    sess.slice(-6).forEach(x=>{ h += x.debut+" → "+x.fin+" ("+x.dureeMin+" min)<br>"; });
+    h += '</div>';
+  }
+  if(sosArr.length){
+    h += '<div class="retour-box"><b>Signalements SOS</b>';
+    sosArr.forEach(x=>{ h += "M"+x.module+" — "+x.date+" : "+x.message+"<br>"; });
+    h += '</div>';
+  }
+  if(satis){
+    h += '<div class="cours-box"><b style="color:var(--blue);display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;">Satisfaction — '+(satis.date||"")+'</b>'+
+    'Contenu '+satis.notes.contenu+'/5 — Accompagnement '+satis.notes.accompagnement+'/5 — Plateforme '+satis.notes.plateforme+'/5 — Recommandation '+satis.notes.recommandation+'/5'+
+    (satis.commentaire ? '<br>Commentaire : '+satis.commentaire : '')+'</div>';
+  }
+  h += '<button class="btn-outline" type="button" onclick="closeModal()">Fermer</button>';
+  document.getElementById('mm-title').textContent = s.nom||"Stagiaire";
+  document.getElementById('mm-sub').textContent = s.email||"";
+  document.getElementById('mm-body').innerHTML = h;
+  document.getElementById('m-modal').style.display='flex';
+};
+
+// ═══ VOIR SOUMISSION + FEEDBACK OBLIGATOIRE ═══
+window.viewSubmission = function(stagId, modNum){
+  const p = (allProgress[stagId]||{})['m'+modNum];
+  if(!p) return;
+  const s = allStag[stagId];
+  const mod = MODULES.find(m=>m.num===modNum);
+  document.getElementById('mm-title').textContent = s.nom+" — Module "+modNum;
+  document.getElementById('mm-sub').textContent = "Soumis le "+p.dateSoumission;
+  document.getElementById('mm-body').innerHTML =
+    '<div class="field"><label>Exercice terrain</label>'+
+    '<div style="font-size:12px;color:var(--muted);margin-bottom:6px;">'+mod.exo+'</div>'+
+    '<div style="background:var(--s2);border-radius:10px;padding:12px;font-size:13px;line-height:1.55;white-space:pre-wrap;">'+p.exercice+'</div></div>'+
+    '<div class="field" style="margin-top:12px;"><label>QCM</label>'+
+    '<div style="font-size:13px;">'+mod.qcm.q+'</div>'+
+    '<div style="margin-top:6px;font-size:13px;font-weight:600;color:'+(p.qcmCorrect?'var(--green)':'var(--red)')+';">Réponse : \u00ab '+mod.qcm.opts[p.qcmReponse]+' \u00bb — '+(p.qcmCorrect?"CORRECT":"INCORRECT")+'</div></div>'+
+    '<div class="field" style="margin-top:12px;"><label>Signature électronique</label>'+
+    '<img src="'+p.signature+'" style="width:100%;border:0.5px solid var(--border2);border-radius:10px;background:#fff;"/></div>'+
+    '<div class="field" style="margin-top:12px;"><label>Ton feedback (OBLIGATOIRE pour valider)</label>'+
+    '<textarea id="fb-text" placeholder="Points forts, axes de progression, conseil personnalisé..." oninput="document.getElementById(\u0027btn-validate\u0027).disabled = this.value.trim().length<20"></textarea>'+
+    '<div style="font-size:11px;color:var(--muted);">20 caractères minimum — le stagiaire verra ce feedback.</div></div>'+
+    '<button class="btn" id="btn-validate" style="margin-top:10px;" type="button" disabled onclick="validateModule(\u0027'+stagId+'\u0027,'+modNum+')">Valider le module '+modNum+'</button>'+
+    '<button class="btn-outline" type="button" onclick="closeModal()">Fermer</button>';
+  document.getElementById('m-modal').style.display='flex';
+};
+
+window.validateModule = async function(stagId, modNum){
+  try {
+    const fb = document.getElementById('fb-text') ? document.getElementById('fb-text').value.trim() : "";
+    if(fb.length<20){ toast("Écris un feedback (20 caractères min)"); return; }
+    await db.ref('progress/'+stagId+'/m'+modNum).update({
+      statut:'valide', feedback:fb,
+      dateValidation:new Date().toLocaleString('fr-FR'), validePar:"Formateur"
+    });
+    await logAction("Module "+modNum+" validé", allStag[stagId].nom+" — feedback transmis");
+    closeModal();
+    toast("Module "+modNum+" validé pour "+allStag[stagId].nom);
+  } catch(e){ showFatal("Erreur validation : "+(e.message||e)); }
+};
+
+window.delStag = async function(id){
+  if(!confirm("Supprimer ce stagiaire et toutes ses données ?")) return;
+  const nom = (allStag[id]||{}).nom||id;
+  await db.ref('stagiaires/'+id).remove();
+  await db.ref('progress/'+id).remove();
+  await db.ref('sessions/'+id).remove();
+  await db.ref('sos/'+id).remove();
+  await db.ref('satisfaction/'+id).remove();
+  await db.ref('brouillons/'+id).remove();
+  await logAction("Stagiaire supprimé", nom);
+  toast("Stagiaire supprimé");
+};
+
+function renderJournal(j){
+  const entries = Object.values(j).sort((a,b)=>b.timestamp-a.timestamp);
+  if(!entries.length){ document.getElementById('a-journal').innerHTML='<div class="empty">Aucune activité</div>'; return; }
+  let html = "";
+  entries.forEach(e => {
+    html += '<div class="log-entry"><div class="log-title">'+e.action+(e.detail?" — "+e.detail:"")+'</div><div class="log-time">'+e.date+'</div></div>';
+  });
+  document.getElementById('a-journal').innerHTML = html;
+}
+
+// ═══ EXPORT CSV OPCO ═══
+function csvEscape(v){ v = String(v==null?"":v).replace(/"/g,'""').replace(/\n/g," "); return '"'+v+'"'; }
+function buildStagCSV(id){
+  const s = allStag[id]||{};
+  const prog = allProgress[id]||{};
+  const sess = Object.values(allSessions[id]||{});
+  const satis = allSatis[id];
+  let rows = [];
+  rows.push(["FICHE STAGIAIRE", s.nom||"", s.email||"", "Inscrit le", s.dateInscription||""]);
+  if(s.positionnement){
+    rows.push(["Positionnement", "Sourcing "+s.positionnement.sourcing+"/5", "Numérique "+s.positionnement.numerique+"/5", "Vente "+s.positionnement.vente+"/5", "Objectif : "+s.positionnement.objectif]);
+  } else { rows.push(["Positionnement","NON COMPLÉTÉ","","",""]); }
+  if(s.convention){
+    rows.push(["Convention", "Signée le "+s.convention.date, "Signataire : "+s.convention.signataire, "Mention : "+s.convention.mention, "IP : "+s.convention.ip]);
+  } else { rows.push(["Convention","NON SIGNÉE","","",""]); }
+  rows.push(["MODULE","STATUT","DATE SOUMISSION","QCM","DATE VALIDATION / FEEDBACK"]);
+  MODULES.forEach(m => {
+    const p = prog['m'+m.num];
+    if(p){
+      rows.push(["Module "+m.num+" — "+m.titre, p.statut, p.dateSoumission||"", p.qcmCorrect?"Correct":"Incorrect", (p.dateValidation||"")+(p.feedback?" — "+p.feedback:"")]);
+    } else {
+      rows.push(["Module "+m.num+" — "+m.titre, "non commencé","","",""]);
+    }
+  });
+  let tot = sess.reduce((a,x)=>a+(x.dureeMin||0),0);
+  rows.push(["FEUILLE D'ÉMARGEMENT","Sessions : "+sess.length,"Total : "+tot+" min","",""]);
+  rows.push(["Début","Fin","Durée (min)","",""]);
+  sess.forEach(x => { rows.push([x.debut, x.fin, x.dureeMin, "",""]); });
+  if(satis){
+    rows.push(["SATISFACTION","Contenu "+satis.notes.contenu+"/5","Accompagnement "+satis.notes.accompagnement+"/5","Plateforme "+satis.notes.plateforme+"/5","Recommandation "+satis.notes.recommandation+"/5"]);
+    if(satis.commentaire) rows.push(["Commentaire", satis.commentaire,"","",""]);
+  }
+  return rows;
+}
+function downloadCSV(rows, filename){
+  const header = [
+    ["ORGANISME DE FORMATION","MAKER ACADEMY","","",""],
+    ["SIRET","92959718500016","","",""],
+    ["Formation","Sourcing & Création Produit — 10h","","",""],
+    ["Export du", new Date().toLocaleString('fr-FR'),"","",""],
+    ["","","","",""]
+  ];
+  const all = header.concat(rows);
+  const csv = "\uFEFF" + all.map(r => r.map(csvEscape).join(";")).join("\r\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+window.exportCSVStag = function(id){
+  const s = allStag[id]||{};
+  downloadCSV(buildStagCSV(id), "Suivi_Qualiopi_"+(s.nom||"stagiaire").replace(/ /g,"_")+"_"+new Date().toISOString().slice(0,10)+".csv");
+  logAction("Export CSV nominatif", s.nom);
+};
+window.exportCSV = function(){
+  let rows = [];
+  Object.keys(allStag).forEach(id => {
+    rows = rows.concat(buildStagCSV(id));
+    rows.push(["","","","",""]);
+  });
+  if(!rows.length){ toast("Aucun stagiaire à exporter"); return; }
+  downloadCSV(rows, "Export_Qualiopi_MAKER_ACADEMY_"+new Date().toISOString().slice(0,10)+".csv");
+  logAction("Export CSV global");
+};
+
+window.switchTab = function(t){
+  ['stag','journal','export'].forEach(x => {
+    document.getElementById('t-'+x).classList.toggle('on', x===t);
+    document.getElementById('p-'+x).style.display = x===t?'block':'none';
+  });
+};
+
+// ═══ INIT ═══
+const saved = sessionStorage.getItem('ma_user');
+if(saved){
+  user = JSON.parse(saved);
+  if(user.role==='formateur'){ loadAdmin(); show('v-admin'); }
+  else { routeStagiaire(); }
+}
+</script>
+</body>
+</html>
