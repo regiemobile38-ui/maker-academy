@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MAKER ACADEMY — Espace Formation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<style>
+:root{
+  --bg:#FAFAF8;--s1:#FFFFFF;--s2:#F2F1EE;--s3:#E8E7E3;
+  --blue:#1A6DD4;--blue-soft:rgba(26,109,212,0.08);
+  --orange:#E85D26;--og:rgba(232,93,38,0.08);--ob:rgba(232,93,38,0.25);
+  --text:#1a1a1a;--muted:#77756F;
+  --border2:rgba(0,0,0,0.12);
+  --green:#2E7D32;--green-bg:rgba(46,125,50,0.1);
+  --r:14px;--font:'Space Grotesk',-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;}
+.view{display:none;min-height:100vh;padding-bottom:60px;}
+.view.active{display:block;}
+
+.hdr{padding:11px 16px;display:flex;align-items:center;justify-content:space-between;background:#0d0d0d;position:sticky;top:0;z-index:50;}
+.hdr-left{display:flex;align-items:center;gap:9px;}
+.hdr-logo{width:32px;height:32px;border-radius:8px;}
+.brand{font-size:14px;font-weight:700;color:#fff;}
+.brand .mk{color:var(--blue);}
+.brand .ac{color:var(--orange);}
+.hdr-badge{font-size:11px;color:#aaa;background:#1c1c1c;padding:4px 10px;border-radius:20px;border:0.5px solid #333;}
+.ob{height:2px;background:var(--orange);}
+
+.card{background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r);padding:16px;margin:12px 14px 0;box-shadow:0 1px 3px rgba(0,0,0,0.04);}
+.sec-title{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin:16px 14px 8px;}
+
+.login-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:var(--bg);}
+.login-brand{text-align:center;margin-bottom:24px;}
+.login-logo{width:110px;height:110px;border-radius:24px;margin-bottom:16px;box-shadow:0 4px 20px rgba(0,0,0,0.10);}
+.login-brand .big{font-size:26px;font-weight:700;color:var(--text);}
+.login-brand .big .mk{color:var(--blue);}
+.login-brand .big .ac{color:var(--orange);}
+.login-brand .sub{font-size:13px;color:var(--muted);margin-top:4px;}
+.login-card{background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r);padding:20px;width:100%;max-width:340px;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.login-title{font-size:17px;font-weight:700;margin-bottom:4px;color:var(--text);}
+.login-sub{font-size:12px;color:var(--muted);margin-bottom:16px;}
+.role-row{display:flex;gap:6px;margin-bottom:16px;}
+.role-btn{flex:1;padding:11px;border:0.5px solid var(--border2);border-radius:8px;background:var(--s2);color:var(--muted);font-size:13px;cursor:pointer;text-align:center;font-family:var(--font);font-weight:500;touch-action:manipulation;-webkit-appearance:none;appearance:none;user-select:none;}
+.role-btn.on{background:var(--og);color:var(--orange);border-color:var(--ob);font-weight:700;}
+.dark-field{margin-bottom:11px;}
+.dark-field label{font-size:10px;color:var(--muted);display:block;margin-bottom:5px;letter-spacing:0.05em;text-transform:uppercase;font-weight:600;}
+.dark-field input{width:100%;padding:12px 13px;background:var(--s2);border:0.5px solid var(--border2);border-radius:10px;color:var(--text);font-size:15px;outline:none;font-family:var(--font);}
+.dark-field input:focus{border-color:var(--orange);}
+.btn{width:100%;padding:13px;background:var(--orange);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);touch-action:manipulation;}
+.btn-blue{background:var(--blue);}
+.btn-outline{width:100%;padding:11px;background:transparent;color:var(--orange);border:0.5px solid var(--ob);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);margin-top:8px;touch-action:manipulation;}
+.err{font-size:12px;color:var(--orange);margin-top:6px;display:none;}
+.login-note{font-size:11px;color:var(--muted);margin-top:12px;text-align:center;line-height:1.5;}
+
+.field{margin-bottom:11px;}
+.field label{font-size:10px;color:var(--muted);display:block;margin-bottom:5px;letter-spacing:0.05em;text-transform:uppercase;font-weight:600;}
+.field input,.field textarea{width:100%;padding:11px 13px;background:var(--s2);border:0.5px solid var(--border2);border-radius:10px;color:var(--text);font-size:14px;outline:none;font-family:var(--font);}
+.field textarea{min-height:110px;resize:vertical;}
+.field input:focus,.field textarea:focus{border-color:var(--blue);}
+
+.prog-wrap{padding:16px 14px 4px;}
+.prog-name{font-size:18px;font-weight:700;}
+.prog-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+.prog-bar{height:6px;background:var(--s3);border-radius:3px;margin-top:12px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--orange);border-radius:3px;transition:width 0.5s;}
+.prog-lbl{font-size:11px;color:var(--muted);margin-top:6px;}
+
+.mod-card{background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r);padding:14px;margin:0 14px 8px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,0.03);cursor:pointer;touch-action:manipulation;}
+.mod-card.locked{opacity:0.5;cursor:default;}
+.mod-card.current{border-color:var(--orange);border-width:1.5px;}
+.mod-num{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;}
+.mod-num.done{background:var(--green-bg);color:var(--green);}
+.mod-num.current{background:var(--og);color:var(--orange);}
+.mod-num.locked{background:var(--s2);color:var(--muted);}
+.mod-info{flex:1;}
+.mod-title{font-size:13px;font-weight:600;}
+.mod-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.mod-badge{font-size:10px;padding:3px 9px;border-radius:20px;font-weight:600;white-space:nowrap;}
+.mb-done{background:var(--green-bg);color:var(--green);}
+.mb-current{background:var(--og);color:var(--orange);}
+.mb-locked{background:var(--s2);color:var(--muted);}
+.mb-wait{background:rgba(232,160,48,0.12);color:#B87A10;}
+
+.qcm-q{font-size:14px;font-weight:600;margin-bottom:10px;line-height:1.4;}
+.qcm-opt{background:var(--s2);border:0.5px solid var(--border2);border-radius:10px;padding:12px;margin-bottom:8px;font-size:13px;cursor:pointer;touch-action:manipulation;transition:all 0.15s;}
+.qcm-opt.sel{background:var(--blue-soft);border-color:var(--blue);font-weight:600;}
+
+.sig-wrap{border:1.5px dashed var(--border2);border-radius:10px;background:var(--s1);position:relative;}
+.sig-wrap canvas{width:100%;height:160px;border-radius:10px;touch-action:none;display:block;}
+.sig-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--s3);font-size:13px;pointer-events:none;}
+.sig-actions{display:flex;gap:8px;margin-top:8px;}
+.sig-clear{flex:1;padding:9px;border:0.5px solid var(--border2);border-radius:8px;background:var(--s2);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;text-align:center;font-family:var(--font);touch-action:manipulation;}
+
+.tabs{display:flex;background:var(--s1);border-bottom:0.5px solid var(--border2);}
+.tab{flex:1;padding:11px;text-align:center;font-size:12px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;touch-action:manipulation;}
+.tab.on{color:var(--orange);border-bottom-color:var(--orange);font-weight:700;}
+.stag-card{background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r);padding:13px;margin:0 14px 8px;box-shadow:0 1px 3px rgba(0,0,0,0.03);}
+.stag-top{display:flex;align-items:center;gap:10px;}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--blue);flex-shrink:0;}
+.stag-name{font-size:14px;font-weight:600;}
+.stag-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+.row-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.act{padding:8px 12px;border:0.5px solid var(--border2);border-radius:8px;background:var(--s2);color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;text-align:center;font-family:var(--font);touch-action:manipulation;}
+.act.gr{border-color:rgba(46,125,50,0.3);color:var(--green);background:var(--green-bg);}
+
+.log-entry{background:var(--s1);border-left:2px solid var(--blue);border-radius:8px;padding:10px 12px;margin:0 14px 6px;font-size:11px;}
+.log-title{font-weight:600;color:var(--text);}
+.log-time{color:var(--muted);margin-top:2px;font-size:10px;}
+
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px 14px 0;}
+.stat{background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r);padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.03);}
+.stat-val{font-size:24px;font-weight:700;color:var(--orange);}
+.stat-val.b{color:var(--blue);}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
+
+.modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:flex-end;justify-content:center;z-index:200;}
+.modal{background:var(--s1);border-radius:18px 18px 0 0;padding:20px 16px 36px;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;}
+.modal-handle{width:32px;height:3px;background:var(--s3);border-radius:2px;margin:0 auto 16px;}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:4px;}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:16px;}
+
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;border-radius:12px;padding:12px 18px;font-size:13px;color:#fff;z-index:999;display:none;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,0.3);}
+.empty{text-align:center;padding:32px 20px;color:var(--muted);font-size:14px;}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+<div id="fatal" style="display:none;position:fixed;top:0;left:0;right:0;background:#C62828;color:#fff;padding:10px 14px;font-size:12px;z-index:9999;font-family:monospace;"></div>
+
+<!-- LOGIN -->
+<div id="v-login" class="view active">
+  <div class="login-wrap">
+    <div class="login-brand">
+      <img class="login-logo" src="data:image/jpeg;base64,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" alt="MAKER ACADEMY"/>
+      <div class="big"><span class="mk">MAKER</span> <span class="ac">ACADEMY</span></div>
+      <div class="sub">Espace formation — Sourcing & Création Produit</div>
+    </div>
+    <div class="login-card">
+      <div class="login-title">Connexion</div>
+      <div class="login-sub">Accédez à votre espace</div>
+      <div class="role-row">
+        <button class="role-btn on" id="rb-stag" type="button">Stagiaire</button>
+        <button class="role-btn" id="rb-form" type="button">Formateur</button>
+      </div>
+      <div class="dark-field"><label>Identifiant</label><input type="text" id="l-id" placeholder="Votre identifiant" autocomplete="off" autocapitalize="none"/></div>
+      <div class="dark-field"><label>Mot de passe</label><input type="password" id="l-pwd" placeholder="......"/></div>
+      <div class="err" id="l-err">Identifiant ou mot de passe incorrect</div>
+      <button class="btn" style="margin-top:12px;" id="btn-login" type="button" onclick="doLogin()">Se connecter</button>
+      <div class="login-note">Le compte formateur est reconnu automatiquement,<br>quel que soit l'espace sélectionné.</div>
+      <div class="login-note" id="fb-status" style="margin-top:6px;">Serveur : vérification...</div>
+    </div>
+  </div>
+</div>
+
+<!-- STAGIAIRE -->
+<div id="v-stag" class="view">
+  <div class="hdr">
+    <div class="hdr-left">
+      <img class="hdr-logo" src="data:image/jpeg;base64,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" alt=""/>
+      <div class="brand"><span class="mk">MAKER</span> <span class="ac">ACADEMY</span></div>
+    </div>
+    <div class="hdr-badge" id="s-badge">Stagiaire</div>
+  </div>
+  <div class="ob"></div>
+  <div class="prog-wrap">
+    <div class="prog-name" id="s-name">Bonjour</div>
+    <div class="prog-sub">Formation Sourcing & Création Produit — 10h</div>
+    <div class="prog-bar"><div class="prog-fill" id="s-prog-fill" style="width:0%"></div></div>
+    <div class="prog-lbl" id="s-prog-lbl">0 module terminé sur 5</div>
+  </div>
+  <div class="sec-title">Votre parcours</div>
+  <div id="s-modules"></div>
+  <div style="padding:0 14px;margin-top:8px;">
+    <button class="btn-outline" onclick="logout()" type="button">Se déconnecter</button>
+  </div>
+</div>
+
+<!-- FORMATEUR -->
+<div id="v-admin" class="view">
+  <div class="hdr">
+    <div class="hdr-left">
+      <img class="hdr-logo" src="data:image/jpeg;base64,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" alt=""/>
+      <div class="brand"><span class="mk">MAKER</span> <span class="ac">ACADEMY</span></div>
+    </div>
+    <div class="hdr-badge">Formateur</div>
+  </div>
+  <div class="ob"></div>
+  <div class="tabs">
+    <div class="tab on" id="t-stag" onclick="switchTab('stag')">Stagiaires</div>
+    <div class="tab" id="t-journal" onclick="switchTab('journal')">Journal Qualiopi</div>
+    <div class="tab" id="t-new" onclick="switchTab('new')">Ajouter</div>
+  </div>
+  <div id="p-stag">
+    <div class="stats">
+      <div class="stat"><div class="stat-val" id="a-nb">0</div><div class="stat-lbl">Stagiaires actifs</div></div>
+      <div class="stat"><div class="stat-val b" id="a-wait">0</div><div class="stat-lbl">Modules en attente</div></div>
+    </div>
+    <div class="sec-title">Suivi des stagiaires</div>
+    <div id="a-list"><div class="empty">Aucun stagiaire</div></div>
+  </div>
+  <div id="p-journal" style="display:none;">
+    <div class="sec-title">Journal d'activité horodaté — preuves Qualiopi</div>
+    <div id="a-journal"><div class="empty">Aucune activité</div></div>
+  </div>
+  <div id="p-new" style="display:none;">
+    <div class="card">
+      <div style="font-size:14px;font-weight:600;margin-bottom:14px;">Nouveau stagiaire</div>
+      <div class="field"><label>Prénom et nom</label><input type="text" id="ns-nom" placeholder="Ex: Jean-Pierre Martin"/></div>
+      <div class="field"><label>Identifiant connexion</label><input type="text" id="ns-id" placeholder="Ex: jeanpierre" autocapitalize="none"/></div>
+      <div class="field"><label>Mot de passe</label><input type="password" id="ns-pwd" placeholder="......"/></div>
+      <button class="btn btn-blue" onclick="createStag()" type="button">Créer le compte stagiaire</button>
+    </div>
+  </div>
+  <div style="padding:0 14px;margin-top:16px;">
+    <button class="btn-outline" onclick="logout()" type="button">Se déconnecter</button>
+  </div>
+</div>
+
+<!-- MODAL MODULE -->
+<div id="m-module" class="modal-bg" style="display:none;">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="mm-title">Module</div>
+    <div class="modal-sub" id="mm-sub">Exercice de fin de module</div>
+    <div id="mm-body"></div>
+  </div>
+</div>
+
+<script>
+function showFatal(msg){var d=document.getElementById('fatal');if(d){d.textContent=msg;d.style.display='block';}}
+window.onerror=function(m,s,l){showFatal('Erreur JS : '+m+' (ligne '+l+')');};
+window.addEventListener('unhandledrejection',function(e){showFatal('Erreur : '+(e.reason&&e.reason.message?e.reason.message:e.reason));});
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBZy_xySurug2-WxD1j1h-9_ziCP7R7soQ",
+  authDomain: "maker-academy-18285.firebaseapp.com",
+  databaseURL: "https://maker-academy-18285-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "maker-academy-18285",
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// Test serveur au chargement — affiche l'état sous le formulaire
+(async function(){
+  const st = document.getElementById('fb-status');
+  try {
+    await db.ref('config').get();
+    if(st){st.textContent='Serveur : connecté';st.style.color='#2E7D32';}
+  } catch(e) {
+    if(st){st.textContent='Serveur : ERREUR — '+(e.message||e);st.style.color='#C62828';}
+    showFatal('Firebase : '+(e.message||e)+' — vérifie les règles de la base (mode test expiré ?)');
+  }
+})();
+
+const MODULES = [
+  {
+    num: 1, titre: "Identifier une vraie opportunité produit",
+    exo: "Carnet de frustrations : décris 3 opportunités produit que tu as identifiées cette semaine. Pour chacune : le problème observé, pourquoi les solutions existantes échouent, et qui paierait pour la résoudre.",
+    qcm: {
+      q: "Pourquoi copier les bestsellers Amazon est une mauvaise stratégie ?",
+      opts: ["C'est illégal", "Marché saturé, guerre des prix, aucune différenciation", "Amazon interdit la revente", "Les produits sont de mauvaise qualité"],
+      bonne: 1
+    }
+  },
+  {
+    num: 2, titre: "Trouver et approcher le bon fournisseur",
+    exo: "Rédige un premier message de contact à une usine 1688 (avec l'aide de l'IA) : présentation, intérêt sincère pour leur savoir-faire, et une question sur leur process. Colle ton message ci-dessous.",
+    qcm: {
+      q: "Une usine te demande un paiement Western Union hors plateforme. Que fais-tu ?",
+      opts: ["J'accepte si le prix est bon", "Je négocie un acompte de 50%", "Je refuse et je coupe le contact — c'est un red flag majeur", "Je demande une réduction en échange"],
+      bonne: 2
+    }
+  },
+  {
+    num: 3, titre: "Passer sa première commande",
+    exo: "Calcule le prix de revient complet d'un produit fictif : prix usine 3€, packaging 0,80€, fret DDP 1,20€/unité. Quel est ton coût total unitaire et à quel prix minimum dois-tu vendre pour une marge de 60% ?",
+    qcm: {
+      q: "Pourquoi ne faut-il pas trop négocier le prix avec une usine partenaire long terme ?",
+      opts: ["C'est impoli en Chine", "L'usine récupère sa marge sur la qualité — pièces internes dégradées", "Les prix sont fixés par la loi", "Ça ralentit la production"],
+      bonne: 1
+    }
+  },
+  {
+    num: 4, titre: "Créer son produit physique de A à Z",
+    exo: "Rédige un brief usine complet pour un produit de ton choix : dimensions, matériaux, couleurs, quantité, packaging souhaité. Utilise l'IA pour le traduire en anglais professionnel.",
+    qcm: {
+      q: "INSO° a pivoté du LCD vers l'e-ink. Quelle était la raison principale ?",
+      opts: ["L'e-ink est moins cher", "L'e-ink est plus joli", "L'autonomie — un utilisateur ne rechargera pas sa porte chaque semaine", "Le LCD n'existe plus"],
+      bonne: 2
+    }
+  },
+  {
+    num: 5, titre: "Lancer et vendre jusqu'à la première vente",
+    exo: "Écris le script complet de ta première vidéo TikTok produit : accroche (0-3s), problème (3-8s), solution en action (8-15s), appel à l'action (15-30s).",
+    qcm: {
+      q: "Quelle est la structure d'une vidéo TikTok produit qui convertit ?",
+      opts: ["Musique + logo + prix", "Accroche 3s, problème, solution en action, appel à l'action", "Présentation longue et détaillée du produit", "Interview du créateur"],
+      bonne: 1
+    }
+  }
+];
+
+let user = null;
+let allStag = {};
+let allProgress = {};
+let loginRole = 'stagiaire';
+let currentModule = null;
+let qcmSelected = null;
+let sigCanvas = null, sigCtx = null, sigDrawn = false;
+
+function show(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function setRole(r) {
+  loginRole = r;
+  document.getElementById('rb-stag').classList.toggle('on', r==='stagiaire');
+  document.getElementById('rb-form').classList.toggle('on', r==='formateur');
+}
+
+// Boutons robustes : addEventListener + onclick
+['rb-stag','rb-form'].forEach(id => {
+  const el = document.getElementById(id);
+  const role = id==='rb-stag' ? 'stagiaire' : 'formateur';
+  el.addEventListener('click', () => setRole(role));
+  el.addEventListener('touchend', (e) => { e.preventDefault(); setRole(role); });
+});
+document.getElementById('btn-login').addEventListener('click', () => doLogin());
+
+// ═══ LOGIN avec AUTO-DÉTECTION ADMIN ═══
+async function getAdminCfg() {
+  // Lit config/admin ET Config/admin (les deux casses)
+  let snap = await db.ref('config/admin').get();
+  if (snap.exists()) return snap.val();
+  snap = await db.ref('Config/admin').get();
+  if (snap.exists()) return snap.val();
+  return {};
+}
+
+window.doLogin = async function doLogin() {
+  try {
+  const id = document.getElementById('l-id').value.trim().toLowerCase();
+  const pwd = document.getElementById('l-pwd').value;
+  document.getElementById('l-err').style.display = 'none';
+  if (!id || !pwd) { document.getElementById('l-err').style.display='block'; return; }
+
+  // 1. AUTO-DÉTECTION : si c'est les identifiants admin, connexion formateur direct
+  const cfg = await getAdminCfg();
+  const adminId = (cfg.id || 'admin').toLowerCase();
+  const adminPwd = cfg.password || 'admin123';
+  if (id === adminId && pwd === adminPwd) {
+    user = {role:'formateur', id:'admin', nom:'Formateur'};
+    sessionStorage.setItem('ma_user', JSON.stringify(user));
+    loadAdmin(); show('v-admin');
+    logAction('Connexion formateur');
+    return;
+  }
+
+  // 2. Sinon, tentative stagiaire
+  const snap = await db.ref('stagiaires/' + id).get();
+  if (!snap.exists()) { document.getElementById('l-err').style.display='block'; return; }
+  const s = snap.val();
+  if (s.password !== pwd) { document.getElementById('l-err').style.display='block'; return; }
+  user = {role:'stagiaire', id, nom: s.nom};
+  sessionStorage.setItem('ma_user', JSON.stringify(user));
+  loadStag(); show('v-stag');
+  logAction('Connexion stagiaire — ' + s.nom);
+  } catch(e) { showFatal('Connexion impossible : '+(e.message||e)); }
+}
+
+window.logout = function() {
+  sessionStorage.removeItem('ma_user');
+  user = null;
+  document.getElementById('l-id').value='';
+  document.getElementById('l-pwd').value='';
+  show('v-login');
+};
+
+async function logAction(action, detail) {
+  await db.ref('journal').push({
+    action, detail: detail||'',
+    user: user ? user.nom : 'Système',
+    userId: user ? user.id : '',
+    timestamp: Date.now(),
+    date: new Date().toLocaleString('fr-FR')
+  });
+}
+
+// ═══ STAGIAIRE ═══
+function loadStag() {
+  document.getElementById('s-name').textContent = 'Bonjour, ' + user.nom.split(' ')[0];
+  document.getElementById('s-badge').textContent = user.nom;
+  db.ref('progress/' + user.id).on('value', snap => {
+    renderStagModules(snap.val() || {});
+  });
+}
+
+function renderStagModules(prog) {
+  let done = 0;
+  MODULES.forEach(m => { if (prog['m'+m.num] && prog['m'+m.num].statut==='valide') done++; });
+  document.getElementById('s-prog-fill').style.width = (done/5*100)+'%';
+  document.getElementById('s-prog-lbl').textContent = done + ' module' + (done>1?'s':'') + ' validé' + (done>1?'s':'') + ' sur 5 — ' + Math.round(done/5*100) + '%';
+
+  let html = '';
+  MODULES.forEach((m, i) => {
+    const p = prog['m'+m.num] || {};
+    const prevDone = i===0 || (prog['m'+MODULES[i-1].num] && prog['m'+MODULES[i-1].num].statut==='valide');
+    let state, badge, numCls, icon;
+    if (p.statut === 'valide') { state='done'; badge='<span class="mod-badge mb-done">Validé</span>'; numCls='done'; icon='✓'; }
+    else if (p.statut === 'soumis') { state='wait'; badge='<span class="mod-badge mb-wait">En validation</span>'; numCls='current'; icon=m.num; }
+    else if (prevDone) { state='current'; badge='<span class="mod-badge mb-current">À faire</span>'; numCls='current'; icon=m.num; }
+    else { state='locked'; badge='<span class="mod-badge mb-locked">Verrouillé</span>'; numCls='locked'; icon='×'; }
+
+    const clickable = (state==='current') ? 'onclick="openModule('+m.num+')"' : '';
+    html += '<div class="mod-card '+(state==='locked'?'locked':'')+' '+(state==='current'?'current':'')+'" '+clickable+'>' +
+      '<div class="mod-num '+numCls+'">'+icon+'</div>' +
+      '<div class="mod-info">' +
+        '<div class="mod-title">Module '+m.num+' — '+m.titre+'</div>' +
+        '<div class="mod-sub">'+(state==='done' ? 'Signé le '+(p.dateValidation||'') : state==='wait' ? 'Soumis — validation formateur en cours' : state==='current' ? 'Exercice + QCM + signature' : 'Débloqué après validation du module '+(m.num-1))+'</div>' +
+      '</div>' + badge + '</div>';
+  });
+  document.getElementById('s-modules').innerHTML = html;
+}
+
+window.openModule = function(num) {
+  currentModule = MODULES.find(m => m.num === num);
+  qcmSelected = null;
+  sigDrawn = false;
+  document.getElementById('mm-title').textContent = 'Module ' + num + ' — ' + currentModule.titre;
+  document.getElementById('mm-sub').textContent = 'Exercice pratique + QCM + signature électronique';
+
+  let qcmHtml = '';
+  currentModule.qcm.opts.forEach((opt, i) => {
+    qcmHtml += '<div class="qcm-opt" id="qcm-'+i+'" onclick="selectQcm('+i+')">'+opt+'</div>';
+  });
+
+  document.getElementById('mm-body').innerHTML =
+    '<div class="field"><label>Exercice pratique</label>' +
+    '<div style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:8px;">'+currentModule.exo+'</div>' +
+    '<textarea id="exo-answer" placeholder="Rédige ta réponse ici..."></textarea></div>' +
+    '<div class="field" style="margin-top:16px;"><label>QCM de validation</label>' +
+    '<div class="qcm-q">'+currentModule.qcm.q+'</div>' + qcmHtml + '</div>' +
+    '<div class="field" style="margin-top:16px;"><label>Signature électronique — je certifie avoir suivi ce module</label>' +
+    '<div class="sig-wrap"><canvas id="sig-canvas"></canvas><div class="sig-hint" id="sig-hint">Signez ici avec le doigt</div></div>' +
+    '<div class="sig-actions"><div class="sig-clear" onclick="clearSig()">Effacer la signature</div></div></div>' +
+    '<button class="btn" style="margin-top:16px;" onclick="submitModule()" type="button">Soumettre le module</button>' +
+    '<button class="btn-outline" onclick="document.getElementById(\'m-module\').style.display=\'none\'" type="button">Fermer</button>';
+  document.getElementById('m-module').style.display = 'flex';
+  setTimeout(initSig, 150);
+};
+
+window.selectQcm = function(i) {
+  qcmSelected = i;
+  currentModule.qcm.opts.forEach((_, j) => {
+    document.getElementById('qcm-'+j).classList.toggle('sel', j===i);
+  });
+};
+
+function initSig() {
+  sigCanvas = document.getElementById('sig-canvas');
+  if (!sigCanvas) return;
+  const rect = sigCanvas.getBoundingClientRect();
+  sigCanvas.width = rect.width * 2;
+  sigCanvas.height = 320;
+  sigCtx = sigCanvas.getContext('2d');
+  sigCtx.scale(2, 2);
+  sigCtx.strokeStyle = '#1a1a1a';
+  sigCtx.lineWidth = 2;
+  sigCtx.lineCap = 'round';
+  let drawing = false, lastX=0, lastY=0;
+
+  function pos(e) {
+    const r = sigCanvas.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return {x: t.clientX - r.left, y: t.clientY - r.top};
+  }
+  function start(e) { e.preventDefault(); drawing=true; const p=pos(e); lastX=p.x; lastY=p.y; }
+  function move(e) {
+    if (!drawing) return; e.preventDefault();
+    const p = pos(e);
+    sigCtx.beginPath(); sigCtx.moveTo(lastX, lastY); sigCtx.lineTo(p.x, p.y); sigCtx.stroke();
+    lastX=p.x; lastY=p.y; sigDrawn=true;
+    document.getElementById('sig-hint').style.display='none';
+  }
+  function end() { drawing=false; }
+
+  sigCanvas.addEventListener('touchstart', start, {passive:false});
+  sigCanvas.addEventListener('touchmove', move, {passive:false});
+  sigCanvas.addEventListener('touchend', end);
+  sigCanvas.addEventListener('mousedown', start);
+  sigCanvas.addEventListener('mousemove', move);
+  sigCanvas.addEventListener('mouseup', end);
+}
+
+window.clearSig = function() {
+  if (sigCtx) {
+    sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+    sigDrawn = false;
+    document.getElementById('sig-hint').style.display='block';
+  }
+};
+
+window.submitModule = async function() {
+  const answer = document.getElementById('exo-answer').value.trim();
+  if (!answer) { toast('Rédige ta réponse à l\'exercice'); return; }
+  if (qcmSelected === null) { toast('Réponds au QCM'); return; }
+  if (!sigDrawn) { toast('Signature obligatoire'); return; }
+
+  const qcmOk = qcmSelected === currentModule.qcm.bonne;
+  const sigData = sigCanvas.toDataURL('image/png');
+
+  await db.ref('progress/' + user.id + '/m' + currentModule.num).set({
+    statut: 'soumis',
+    exercice: answer,
+    qcmReponse: qcmSelected,
+    qcmCorrect: qcmOk,
+    signature: sigData,
+    dateSoumission: new Date().toLocaleString('fr-FR'),
+    timestamp: Date.now()
+  });
+
+  await logAction('Module ' + currentModule.num + ' soumis',
+    user.nom + ' — QCM ' + (qcmOk?'correct':'incorrect') + ' — signé électroniquement');
+
+  document.getElementById('m-module').style.display = 'none';
+  toast('Module ' + currentModule.num + ' soumis au formateur');
+};
+
+// ═══ ADMIN ═══
+function loadAdmin() {
+  db.ref('stagiaires').on('value', snap => { allStag = snap.val() || {}; renderAdminStag(); });
+  db.ref('progress').on('value', snap => { allProgress = snap.val() || {}; renderAdminStag(); });
+  db.ref('journal').limitToLast(60).on('value', snap => { renderJournal(snap.val() || {}); });
+}
+
+function renderAdminStag() {
+  const list = Object.entries(allStag);
+  document.getElementById('a-nb').textContent = list.length;
+
+  let waitCount = 0;
+  Object.values(allProgress).forEach(p => {
+    Object.values(p||{}).forEach(m => { if (m.statut==='soumis') waitCount++; });
+  });
+  document.getElementById('a-wait').textContent = waitCount;
+
+  if (!list.length) { document.getElementById('a-list').innerHTML = '<div class="empty">Aucun stagiaire</div>'; return; }
+
+  let html = '';
+  list.forEach(([id, s]) => {
+    const prog = allProgress[id] || {};
+    let done = 0, pending = null;
+    MODULES.forEach(m => {
+      const p = prog['m'+m.num];
+      if (p && p.statut==='valide') done++;
+      if (p && p.statut==='soumis' && !pending) pending = m.num;
+    });
+    const initials = s.nom.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    let actions = '';
+    if (pending) {
+      actions = '<div class="row-actions">' +
+        '<div class="act" onclick="viewSubmission(\''+id+'\', '+pending+')">Voir soumission M'+pending+'</div>' +
+        '<div class="act gr" onclick="validateModule(\''+id+'\', '+pending+')">Valider M'+pending+'</div></div>';
+    }
+    html += '<div class="stag-card"><div class="stag-top">' +
+      '<div class="avatar">'+initials+'</div>' +
+      '<div style="flex:1;"><div class="stag-name">'+s.nom+'</div>' +
+      '<div class="stag-sub">'+done+'/5 modules validés'+(pending ? ' · Module '+pending+' en attente' : '')+'</div></div></div>' +
+      '<div class="prog-bar" style="margin-top:10px;"><div class="prog-fill" style="width:'+(done/5*100)+'%"></div></div>' +
+      actions + '</div>';
+  });
+  document.getElementById('a-list').innerHTML = html;
+}
+
+window.viewSubmission = function(stagId, modNum) {
+  const p = (allProgress[stagId]||{})['m'+modNum];
+  if (!p) return;
+  const s = allStag[stagId];
+  const mod = MODULES.find(m=>m.num===modNum);
+  document.getElementById('mm-title').textContent = s.nom + ' — Module ' + modNum;
+  document.getElementById('mm-sub').textContent = 'Soumis le ' + p.dateSoumission;
+  document.getElementById('mm-body').innerHTML =
+    '<div class="field"><label>Exercice</label>' +
+    '<div style="font-size:12px;color:var(--muted);margin-bottom:6px;">'+mod.exo+'</div>' +
+    '<div style="background:var(--s2);border-radius:10px;padding:12px;font-size:13px;line-height:1.5;white-space:pre-wrap;">'+p.exercice+'</div></div>' +
+    '<div class="field" style="margin-top:12px;"><label>QCM</label>' +
+    '<div style="font-size:13px;">'+mod.qcm.q+'</div>' +
+    '<div style="margin-top:6px;font-size:13px;font-weight:600;color:'+(p.qcmCorrect?'var(--green)':'var(--orange)')+';">' +
+    'Réponse : "'+mod.qcm.opts[p.qcmReponse]+'" — '+(p.qcmCorrect ? 'CORRECT' : 'INCORRECT')+'</div></div>' +
+    '<div class="field" style="margin-top:12px;"><label>Signature électronique</label>' +
+    '<img src="'+p.signature+'" style="width:100%;border:0.5px solid var(--border2);border-radius:10px;background:#fff;"/></div>' +
+    '<button class="btn" style="margin-top:12px;" onclick="validateModule(\''+stagId+'\', '+modNum+'); document.getElementById(\'m-module\').style.display=\'none\';" type="button">Valider le module '+modNum+'</button>' +
+    '<button class="btn-outline" onclick="document.getElementById(\'m-module\').style.display=\'none\'" type="button">Fermer</button>';
+  document.getElementById('m-module').style.display = 'flex';
+};
+
+window.validateModule = async function(stagId, modNum) {
+  await db.ref('progress/' + stagId + '/m' + modNum).update({
+    statut: 'valide',
+    dateValidation: new Date().toLocaleString('fr-FR'),
+    validePar: 'Formateur'
+  });
+  await logAction('Module ' + modNum + ' validé', allStag[stagId].nom + ' — validé par le formateur');
+  toast('Module ' + modNum + ' validé pour ' + allStag[stagId].nom);
+};
+
+function renderJournal(j) {
+  const entries = Object.values(j).sort((a,b)=>b.timestamp-a.timestamp);
+  if (!entries.length) { document.getElementById('a-journal').innerHTML = '<div class="empty">Aucune activité</div>'; return; }
+  let html = '';
+  entries.forEach(e => {
+    html += '<div class="log-entry"><div class="log-title">'+e.action+(e.detail ? ' — '+e.detail : '')+'</div>' +
+      '<div class="log-time">'+e.date+'</div></div>';
+  });
+  document.getElementById('a-journal').innerHTML = html;
+}
+
+window.createStag = async function() {
+  const nom = document.getElementById('ns-nom').value.trim();
+  const id = document.getElementById('ns-id').value.trim().toLowerCase();
+  const pwd = document.getElementById('ns-pwd').value;
+  if (!nom||!id||!pwd) { toast('Remplissez tous les champs'); return; }
+  const snap = await db.ref('stagiaires/'+id).get();
+  if (snap.exists()) { toast('Identifiant déjà pris'); return; }
+  await db.ref('stagiaires/'+id).set({nom, password:pwd, createdAt:Date.now()});
+  await logAction('Stagiaire créé', nom);
+  ['ns-nom','ns-id','ns-pwd'].forEach(i=>document.getElementById(i).value='');
+  toast('Stagiaire ' + nom + ' créé');
+  switchTab('stag');
+};
+
+window.switchTab = function(t) {
+  ['stag','journal','new'].forEach(x => {
+    document.getElementById('t-'+x).classList.toggle('on', x===t);
+    document.getElementById('p-'+x).style.display = x===t?'block':'none';
+  });
+};
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(()=>t.style.display='none', 2500);
+}
+
+const saved = sessionStorage.getItem('ma_user');
+if (saved) {
+  user = JSON.parse(saved);
+  if (user.role==='formateur') { loadAdmin(); show('v-admin'); }
+  else { loadStag(); show('v-stag'); }
+}
+</script>
+</body>
+</html>
